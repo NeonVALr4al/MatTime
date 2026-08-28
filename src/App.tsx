@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Auth from './Auth';
-import SessionForm from './SessionForm';
-import SessionList from './SessionList';
-import SparringForm from './SparringForm';
-import SparringList from './SparringList';
-import PromotionForm from './PromotionForm';
-import PromotionList from './PromotionList';
+import BottomNav from './BottomNav';
+import type { Tab } from './BottomNav';
+import CombatScreen from './screens/CombatScreen';
+import LogScreen from './screens/LogScreen';
+import JourneyScreen from './screens/JourneyScreen';
+import HistoryScreen from './screens/HistoryScreen';
+import MetricsScreen from './screens/MetricsScreen';
 import type { Session } from '@supabase/supabase-js';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
-  const [sessionRefresh, setSessionRefresh] = useState(0);
-  const [sparringRefresh, setSparringRefresh] = useState(0);
-  const [promotionRefresh, setPromotionRefresh] = useState(0);
+  const [activeTab, setActiveTab] = useState<Tab>('combat');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -25,37 +24,25 @@ function App() {
 
   if (!session) return <Auth />;
 
+  const renderScreen = () => {
+    switch (activeTab) {
+      case 'combat':
+        return <CombatScreen session={session} onNavigate={setActiveTab} />;
+      case 'log':
+        return <LogScreen session={session} />;
+      case 'journey':
+        return <JourneyScreen session={session} />;
+      case 'history':
+        return <HistoryScreen />;
+      case 'metrics':
+        return <MetricsScreen />;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900">
-      <header className="border-b border-slate-800 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-white font-bold text-lg">MatTime</h1>
-        <div className="flex items-center gap-3">
-          <span className="text-slate-400 text-sm hidden sm:inline">{session.user.email}</span>
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="text-sm text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-md transition-colors"
-          >
-            Log Out
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-xl mx-auto px-4 py-6 space-y-10">
-        <section className="space-y-4">
-          <SessionForm userId={session.user.id} onSessionAdded={() => setSessionRefresh((k) => k + 1)} />
-          <SessionList refreshKey={sessionRefresh} />
-        </section>
-
-        <section className="space-y-4">
-          <SparringForm userId={session.user.id} onAdded={() => setSparringRefresh((k) => k + 1)} />
-          <SparringList refreshKey={sparringRefresh} />
-        </section>
-
-        <section className="space-y-4">
-          <PromotionForm userId={session.user.id} onAdded={() => setPromotionRefresh((k) => k + 1)} />
-          <PromotionList refreshKey={promotionRefresh} />
-        </section>
-      </main>
+    <div className="min-h-screen bg-black pb-20">
+      <main className="max-w-xl mx-auto px-4 py-6">{renderScreen()}</main>
+      <BottomNav active={activeTab} onChange={setActiveTab} />
     </div>
   );
 }
