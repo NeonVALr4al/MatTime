@@ -109,9 +109,13 @@ export default function CombatScreen({ session, onNavigate }: Props) {
           <p className="text-xs font-semibold text-red-500 tracking-wide">OS.TACTICAL_</p>
           <h1 className="text-2xl font-bold">Welcome back, {loading ? '...' : displayName}</h1>
         </div>
-        <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold border-2 border-red-500 flex-shrink-0">
+        <button
+          type="button"
+          onClick={() => onNavigate('profile')}
+          className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold border-2 border-red-500 flex-shrink-0"
+        >
           {displayName ? displayName.charAt(0).toUpperCase() : '?'}
-        </div>
+        </button>
       </div>
 
       {/* Weekly streak card */}

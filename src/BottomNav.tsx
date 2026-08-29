@@ -1,4 +1,4 @@
-type Tab = 'combat' | 'log' | 'journey' | 'history' | 'metrics';
+type Tab = 'combat' | 'log' | 'journey' | 'history' | 'metrics' | 'profile';
 
 type Props = {
   active: Tab;

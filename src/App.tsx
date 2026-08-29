@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Auth from './Auth';
 import BottomNav from './BottomNav';
+import ProfileScreen from './screens/ProfileScreen';
 import type { Tab } from './BottomNav';
 import CombatScreen from './screens/CombatScreen';
 import LogScreen from './screens/LogScreen';
@@ -33,9 +34,11 @@ function App() {
       case 'journey':
         return <JourneyScreen session={session} />;
       case 'history':
-        return <HistoryScreen />;
+        return <HistoryScreen session={session} />;
       case 'metrics':
-        return <MetricsScreen />;
+        return <MetricsScreen session={session} />;
+      case 'profile':
+        return <ProfileScreen session={session} />;
     }
   };
 
