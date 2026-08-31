@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
+import DeleteButton from './components/DeleteButton';
 
 type Technique = { name: string; category: string };
 
@@ -58,16 +59,20 @@ export default function SessionList({ refreshKey }: Props) {
   if (loading) return <p className="text-mat-faint text-sm">Loading sessions...</p>;
   if (sessions.length === 0) return <p className="text-mat-faint text-sm">No sessions logged yet.</p>;
 
-  return (
+    return (
     <div className="space-y-3">
       <h3 className="text-lg font-bold text-mat-text">Your Sessions</h3>
-      {sessions.map((s) => (
-        <Card key={s.id}>
+      <div className="max-h-[420px] overflow-y-auto space-y-3 pr-1">
+        {sessions.map((s) => (
+                <Card key={s.id}>
           <div className="flex items-center justify-between">
             <p className="text-mat-text font-bold">{s.session_date}</p>
-            <span className="text-xs uppercase tracking-wide text-mat-red bg-[rgba(255,46,85,0.13)] px-2 py-0.5 rounded">
-              {s.class_type}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase tracking-wide text-mat-red bg-[rgba(255,46,85,0.13)] px-2 py-0.5 rounded">
+                {s.class_type}
+              </span>
+              <DeleteButton onClick={() => handleDelete(s.id)} disabled={deletingId === s.id} />
+            </div>
           </div>
           <p className="text-sm text-mat-muted mt-1">
             {s.duration_minutes} min · intensity {s.intensity}/5
@@ -78,15 +83,9 @@ export default function SessionList({ refreshKey }: Props) {
               <span className="text-mat-faint">Techniques:</span> {s.techniques.map((t) => t.name).join(', ')}
             </p>
           )}
-          <button
-            onClick={() => handleDelete(s.id)}
-            disabled={deletingId === s.id}
-            className="mt-3 min-h-[44px] px-3 -ml-3 text-sm text-mat-red hover:opacity-80 disabled:opacity-50 transition-all duration-200 active:scale-[0.98]"
-          >
-            {deletingId === s.id ? 'Deleting...' : 'Delete'}
-          </button>
         </Card>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

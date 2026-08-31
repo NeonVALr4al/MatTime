@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
+import DeleteButton from './components/DeleteButton';
 
 type Roll = {
   id: string;
@@ -45,14 +46,18 @@ export default function SparringList({ refreshKey }: Props) {
   if (loading) return <p className="text-mat-faint text-sm">Loading rolls...</p>;
   if (rolls.length === 0) return <p className="text-mat-faint text-sm">No rolls logged yet.</p>;
 
-  return (
+    return (
     <div className="space-y-3">
       <h3 className="text-lg font-bold text-mat-text">Your Rolls</h3>
-      {rolls.map((r) => (
-        <Card key={r.id}>
+      <div className="max-h-[420px] overflow-y-auto space-y-3 pr-1">
+        {rolls.map((r) => (
+                <Card key={r.id}>
           <div className="flex items-center justify-between">
             <p className="text-mat-text font-bold">{r.roll_date}</p>
-            {r.opponent_note && <span className="text-xs text-mat-muted">{r.opponent_note}</span>}
+            <div className="flex items-center gap-2">
+              {r.opponent_note && <span className="text-xs text-mat-muted">{r.opponent_note}</span>}
+              <DeleteButton onClick={() => handleDelete(r.id)} disabled={deletingId === r.id} />
+            </div>
           </div>
           {r.position_result && <p className="text-sm text-mat-muted mt-1">{r.position_result}</p>}
           {r.submission_landed && (
@@ -62,15 +67,9 @@ export default function SparringList({ refreshKey }: Props) {
             <p className="text-sm text-mat-red mt-1">Received: {r.submission_received}</p>
           )}
           {r.notes && <p className="text-sm text-mat-muted italic mt-2">{r.notes}</p>}
-          <button
-            onClick={() => handleDelete(r.id)}
-            disabled={deletingId === r.id}
-            className="mt-3 min-h-[44px] px-3 -ml-3 text-sm text-mat-red hover:opacity-80 disabled:opacity-50 transition-all duration-200 active:scale-[0.98]"
-          >
-            {deletingId === r.id ? 'Deleting...' : 'Delete'}
-          </button>
         </Card>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
