@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import Card from "./components/Card";
 import DeleteButton from "./components/DeleteButton";
+import CollapsibleSection from "./components/CollapsibleSection";
 
 type Promotion = {
   id: string;
@@ -88,8 +89,7 @@ export default function PromotionList({ userId, refreshKey, onChanged }: Props) 
     return <p className="text-mat-faint text-sm">No promotions logged yet.</p>;
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-bold text-mat-text">Promotion History</h3>
+    <CollapsibleSection title="Promotion History" defaultOpen={false}>
       <div className="max-h-[300px] overflow-y-auto no-scrollbar space-y-3 pr-1">
         {promotions.map((p) => (
           <Card key={p.id} className="flex items-center justify-between">
@@ -112,6 +112,6 @@ export default function PromotionList({ userId, refreshKey, onChanged }: Props) 
           </Card>
         ))}
       </div>
-    </div>
+    </CollapsibleSection>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
+import { SPARRING_CATEGORIES } from './sparringCategories';
 
 type Props = {
   userId: string;
@@ -18,6 +19,7 @@ export default function SparringForm({ userId, onAdded }: Props) {
   const [position, setPosition] = useState('');
   const [submissionLanded, setSubmissionLanded] = useState('');
   const [submissionReceived, setSubmissionReceived] = useState('');
+  const [category, setCategory] = useState('');
   const [notes, setNotes] = useState('');
   const [submissionTechniques, setSubmissionTechniques] = useState<Technique[]>([]);
   const [error, setError] = useState('');
@@ -49,6 +51,7 @@ export default function SparringForm({ userId, onAdded }: Props) {
       position_result: positionResult,
       submission_landed: submissionLanded || null,
       submission_received: submissionReceived || null,
+      category: category || null,
       notes: notes || null,
     });
 
@@ -59,6 +62,7 @@ export default function SparringForm({ userId, onAdded }: Props) {
     setPosition('');
     setSubmissionLanded('');
     setSubmissionReceived('');
+    setCategory('');
     setNotes('');
     onAdded();
   };
@@ -111,6 +115,20 @@ export default function SparringForm({ userId, onAdded }: Props) {
               className={`${inputClass} flex-1 min-w-0`}
             />
           </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Focus Area</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={`${selectClass} w-full`}
+          >
+            <option value="">Uncategorized</option>
+            {SPARRING_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

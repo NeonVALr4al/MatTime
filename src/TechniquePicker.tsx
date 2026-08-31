@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
 import PillTag from './components/PillTag';
+import CollapsibleSection from './components/CollapsibleSection';
 
 type Technique = {
   id: string;
@@ -14,15 +15,23 @@ type Props = {
   onChange: (ids: string[]) => void;
 };
 
-const CATEGORIES = ['submission', 'sweep', 'takedown', 'escape', 'guard pass', 'guard retention', 'other'];
+const CATEGORY_ORDER = ['submission', 'sweep', 'takedown', 'escape', 'guard pass', 'guard retention', 'other'];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  submission: 'Submissions',
+  sweep: 'Sweeps',
+  takedown: 'Takedowns',
+  escape: 'Escapes',
+  'guard pass': 'Guard Passing',
+  'guard retention': 'Guard Retention',
+  other: 'Other',
+};
 
 export default function TechniquePicker({ selectedIds, onChange }: Props) {
   const [techniques, setTechniques] = useState<Technique[]>([]);
   const [search, setSearch] = useState('');
-  const [newName, setNewName] = useState('');
-  const [newCategory, setNewCategory] = useState('submission');
-  const [adding, setAdding] = useState(false);
-  const [error, setError] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchTechniques = async () => {
     const { data, error } = await supabase.from('techniques').select('id, name, category').order('name');
@@ -37,85 +46,99 @@ export default function TechniquePicker({ selectedIds, onChange }: Props) {
     onChange(selectedIds.includes(id) ? selectedIds.filter((x) => x !== id) : [...selectedIds, id]);
   };
 
-  const handleAddTechnique = async () => {
-    if (!newName.trim()) return;
-    setAdding(true);
-    setError('');
-
-    const { data: userData } = await supabase.auth.getUser();
-    const { data, error } = await supabase
-      .from('techniques')
-      .insert({ name: newName.trim(), category: newCategory, created_by: userData.user?.id })
-      .select()
-      .single();
-
-    setAdding(false);
-    if (error) return setError(error.message);
-
-    setTechniques((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
-    onChange([...selectedIds, data.id]);
-    setNewName('');
+  const handleDeleteTechnique = async (id: string) => {
+    if (!window.confirm('Delete this technique? This cannot be undone.')) return;
+    setDeletingId(id);
+    const { error } = await supabase.from('techniques').delete().eq('id', id);
+    setDeletingId(null);
+    if (error) return alert(`Failed to delete: ${error.message}`);
+    setTechniques((prev) => prev.filter((t) => t.id !== id));
+    onChange(selectedIds.filter((sid) => sid !== id));
   };
 
-  const filteredTechniques = techniques.filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase())
+  const trimmedSearch = search.trim().toLowerCase();
+  const hasSearch = trimmedSearch.length > 0;
+  const filteredTechniques = techniques.filter((t) => t.name.toLowerCase().includes(trimmedSearch));
+
+  const groupedTechniques = CATEGORY_ORDER.map((category) => ({
+    category,
+    items: techniques.filter((t) => t.category === category),
+  })).filter((g) => g.items.length > 0);
+
+  const selectedNames = selectedIds
+    .map((id) => techniques.find((t) => t.id === id)?.name)
+    .filter((name): name is string => Boolean(name));
+
+  const renderPill = (t: Technique) => (
+    <div key={t.id} className="relative">
+      <PillTag label={t.name} selected={selectedIds.includes(t.id)} onClick={() => toggle(t.id)} />
+      <button
+        type="button"
+        onClick={() => handleDeleteTechnique(t.id)}
+        disabled={deletingId === t.id}
+        aria-label={`Delete ${t.name}`}
+        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-mat-card border border-mat-border-strong text-mat-faint hover:text-mat-red text-[11px] leading-none flex items-center justify-center disabled:opacity-40 transition-colors"
+      >
+        ×
+      </button>
+    </div>
   );
 
   return (
     <Card>
       <p className="text-sm font-semibold text-mat-muted mb-3">Techniques drilled</p>
 
-      <input
-        type="text"
-        placeholder="Search techniques..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full min-h-[40px] rounded-lg bg-mat-bg border border-mat-border-strong text-mat-text placeholder-mat-faint px-3 text-sm outline-none transition-all duration-200 focus:border-mat-red mb-3"
-      />
-
-      <div className="max-h-40 overflow-y-auto no-scrollbar flex flex-wrap gap-2 mb-4 pr-1">
-        {techniques.length === 0 && <p className="text-sm text-mat-faint italic">No techniques yet, add one below.</p>}
-        {techniques.length > 0 && filteredTechniques.length === 0 && (
-          <p className="text-sm text-mat-faint italic">No techniques match "{search}".</p>
-        )}
-        {filteredTechniques.map((t) => (
-          <PillTag
-            key={t.id}
-            label={t.name}
-            sublabel={`(${t.category})`}
-            selected={selectedIds.includes(t.id)}
-            onClick={() => toggle(t.id)}
-          />
-        ))}
-      </div>
-
-      <div className="flex gap-2">
+      {searchOpen ? (
         <input
           type="text"
-          placeholder="New technique name"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          className="flex-1 min-w-0 min-h-[44px] rounded-lg bg-mat-bg border border-mat-border-strong text-mat-text placeholder-mat-faint px-3 text-sm outline-none transition-all duration-200 focus:border-mat-red"
+          autoFocus
+          placeholder="Search techniques..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onBlur={() => {
+            if (!search) setSearchOpen(false);
+          }}
+          className="w-full min-h-[40px] rounded-lg bg-mat-bg border border-mat-border-strong text-mat-text placeholder-mat-faint px-3 text-sm outline-none transition-all duration-200 focus:border-mat-red"
         />
-        <select
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-          className="min-h-[44px] rounded-lg bg-mat-bg border border-mat-border-strong text-mat-text px-2 text-sm outline-none transition-all duration-200 focus:border-mat-red"
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+      ) : (
         <button
           type="button"
-          onClick={handleAddTechnique}
-          disabled={adding || !newName.trim()}
-          className="min-h-[44px] px-4 rounded-lg bg-mat-red hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
+          onClick={() => setSearchOpen(true)}
+          aria-label="Search techniques"
+          className="text-mat-faint hover:text-mat-red transition-colors"
         >
-          {adding ? '...' : 'Add'}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
+            <circle cx="11" cy="11" r="7" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M21 21l-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
-      </div>
-      {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+      )}
+
+      {techniques.length === 0 ? (
+        <p className="text-sm text-mat-faint italic mt-3">No techniques available yet.</p>
+      ) : hasSearch ? (
+        <div className="max-h-40 overflow-y-auto no-scrollbar flex flex-wrap gap-2 mt-3">
+          {filteredTechniques.length === 0 ? (
+            <p className="text-sm text-mat-faint italic">No techniques match "{search}".</p>
+          ) : (
+            filteredTechniques.map(renderPill)
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2 mt-3">
+          {groupedTechniques.map((g) => (
+            <CollapsibleSection key={g.category} title={CATEGORY_LABELS[g.category] ?? g.category} defaultOpen={false}>
+              <div className="flex flex-wrap gap-2">{g.items.map(renderPill)}</div>
+            </CollapsibleSection>
+          ))}
+        </div>
+      )}
+
+      {selectedNames.length > 0 && (
+        <p className="text-xs text-mat-muted mt-3">
+          <span className="text-mat-faint">Selected:</span> {selectedNames.join(', ')}
+        </p>
+      )}
     </Card>
   );
 }

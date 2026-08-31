@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
 import DeleteButton from './components/DeleteButton';
+import CollapsibleSection from './components/CollapsibleSection';
 
 type Roll = {
   id: string;
@@ -47,8 +48,7 @@ export default function SparringList({ refreshKey }: Props) {
   if (rolls.length === 0) return <p className="text-mat-faint text-sm">No rolls logged yet.</p>;
 
     return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-bold text-mat-text">Your Rolls</h3>
+    <CollapsibleSection title="Your Rolls" defaultOpen={false}>
       <div className="max-h-[420px] overflow-y-auto no-scrollbar space-y-3 pr-1">
         {rolls.map((r) => (
                 <Card key={r.id}>
@@ -70,6 +70,6 @@ export default function SparringList({ refreshKey }: Props) {
         </Card>
         ))}
       </div>
-    </div>
+    </CollapsibleSection>
   );
 }

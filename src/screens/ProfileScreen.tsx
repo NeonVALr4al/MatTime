@@ -2,19 +2,18 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
 import Card from '../components/Card';
+import PositionMatrixModal from '../components/PositionMatrixModal';
+import TrophyCase from '../components/TrophyCase';
+import { BELT_COLOR, TIP_COLOR } from '../beltColors';
 
 type Props = { session: Session };
 
-const BELT_BADGE_COLOR: Record<string, string> = {
-  white: 'bg-[#3f3f46]',
-  blue: 'bg-[#1e3a8a]',
-  purple: 'bg-[#581c87]',
-  brown: 'bg-[#78350f]',
-  black: 'bg-black border border-mat-border-strong',
-};
-
 function formatMonthYear(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+function toUrl(value: string): string {
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
 }
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -22,9 +21,15 @@ const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 export default function ProfileScreen({ session }: Props) {
   const [displayName, setDisplayName] = useState('');
   const [gymName, setGymName] = useState('');
+  const [gymUrl, setGymUrl] = useState('');
   const [belt, setBelt] = useState('white');
   const [stripes, setStripes] = useState(0);
   const [trainingSince, setTrainingSince] = useState<string | null>(null);
+  const [trainingSinceOverride, setTrainingSinceOverride] = useState<string | null>(null);
+  const [editingTrainingSince, setEditingTrainingSince] = useState(false);
+  const [trainingSinceInput, setTrainingSinceInput] = useState('');
+  const [savingTrainingSince, setSavingTrainingSince] = useState(false);
+  const [trainingSinceError, setTrainingSinceError] = useState('');
   const [sessionCount, setSessionCount] = useState(0);
   const [hasFirstSub, setHasFirstSub] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -34,8 +39,11 @@ export default function ProfileScreen({ session }: Props) {
   const [signingOut, setSigningOut] = useState(false);
   const [editingGym, setEditingGym] = useState(false);
   const [gymInput, setGymInput] = useState('');
+  const [gymUrlInput, setGymUrlInput] = useState('');
   const [savingGym, setSavingGym] = useState(false);
   const [gymError, setGymError] = useState('');
+  const [showTrophyCase, setShowTrophyCase] = useState(false);
+  const [showPositionMatrix, setShowPositionMatrix] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -43,16 +51,18 @@ export default function ProfileScreen({ session }: Props) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, gym_name, current_belt, current_stripes, created_at, avatar_url')
+        .select('display_name, gym_name, gym_url, current_belt, current_stripes, created_at, avatar_url, training_since')
         .eq('id', session.user.id)
         .single();
 
       if (profile) {
         setDisplayName(profile.display_name || session.user.email?.split('@')[0] || 'Grappler');
         setGymName(profile.gym_name || '');
+        setGymUrl(profile.gym_url || '');
         setBelt(profile.current_belt);
         setStripes(profile.current_stripes);
-        setTrainingSince(profile.created_at);
+        setTrainingSinceOverride(profile.training_since);
+        setTrainingSince(profile.training_since || profile.created_at);
         setAvatarUrl(profile.avatar_url);
       }
 
@@ -63,7 +73,7 @@ export default function ProfileScreen({ session }: Props) {
         .order('promotion_date', { ascending: true })
         .limit(1);
 
-      if (promotions && promotions.length > 0) {
+      if (!profile?.training_since && promotions && promotions.length > 0) {
         setTrainingSince(promotions[0].promotion_date);
       }
 
@@ -138,6 +148,7 @@ export default function ProfileScreen({ session }: Props) {
   const startEditingGym = () => {
     setGymError('');
     setGymInput(gymName);
+    setGymUrlInput(gymUrl);
     setEditingGym(true);
   };
 
@@ -150,10 +161,11 @@ export default function ProfileScreen({ session }: Props) {
     setGymError('');
     setSavingGym(true);
 
-    const trimmed = gymInput.trim();
+    const trimmedName = gymInput.trim();
+    const trimmedUrl = gymUrlInput.trim();
     const { error } = await supabase
       .from('profiles')
-      .update({ gym_name: trimmed || null })
+      .update({ gym_name: trimmedName || null, gym_url: trimmedUrl ? toUrl(trimmedUrl) : null })
       .eq('id', session.user.id);
 
     setSavingGym(false);
@@ -163,8 +175,41 @@ export default function ProfileScreen({ session }: Props) {
       return;
     }
 
-    setGymName(trimmed);
+    setGymName(trimmedName);
+    setGymUrl(trimmedUrl ? toUrl(trimmedUrl) : '');
     setEditingGym(false);
+  };
+
+  const startEditingTrainingSince = () => {
+    setTrainingSinceError('');
+    setTrainingSinceInput(trainingSinceOverride ?? trainingSince ?? new Date().toISOString().split('T')[0]);
+    setEditingTrainingSince(true);
+  };
+
+  const cancelEditingTrainingSince = () => {
+    setEditingTrainingSince(false);
+    setTrainingSinceError('');
+  };
+
+  const handleSaveTrainingSince = async () => {
+    setTrainingSinceError('');
+    setSavingTrainingSince(true);
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ training_since: trainingSinceInput || null })
+      .eq('id', session.user.id);
+
+    setSavingTrainingSince(false);
+
+    if (error) {
+      setTrainingSinceError(error.message);
+      return;
+    }
+
+    setTrainingSinceOverride(trainingSinceInput || null);
+    setTrainingSince(trainingSinceInput || null);
+    setEditingTrainingSince(false);
   };
 
   const handleSignOut = async () => {
@@ -226,21 +271,43 @@ export default function ProfileScreen({ session }: Props) {
             <div className="flex flex-col gap-1 min-w-0">
               <p className="font-extrabold text-mat-text text-lg truncate">{displayName}</p>
               <div className="flex items-center gap-1.5">
-                <span className={`${BELT_BADGE_COLOR[belt] ?? BELT_BADGE_COLOR.white} inline-block w-fit px-2 py-0.5 rounded text-[10px] font-bold text-white`}>
-                  {belt.toUpperCase()} BELT
-                </span>
                 <div
-                  className="flex items-center gap-[3px] bg-black rounded-[2px] px-1.5 py-1"
-                  aria-label={`${stripes} stripe${stripes === 1 ? '' : 's'}`}
-                  title={`${stripes} stripe${stripes === 1 ? '' : 's'}`}
+                  className={`relative w-28 h-6 rounded-md overflow-hidden ${BELT_COLOR[belt] ?? BELT_COLOR.white}`}
+                  aria-label={`${belt} belt, ${stripes} stripe${stripes === 1 ? '' : 's'}`}
                 >
-                  {[0, 1, 2, 3].map((i) => (
-                    <span
-                      key={i}
-                      className={`w-[3px] h-3 rounded-[1px] ${i < stripes ? 'bg-white' : 'bg-white/15'}`}
-                    />
-                  ))}
+                  <div className={`absolute right-0 top-0 h-full flex items-center gap-[3px] px-1.5 ${TIP_COLOR[belt] ?? 'bg-black'}`}>
+                    {[0, 1, 2, 3].map((i) => (
+                      <span
+                        key={i}
+                        className={`w-[3px] h-3 rounded-[1px] ${i < stripes ? 'bg-white' : 'bg-white/15'}`}
+                      />
+                    ))}
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowTrophyCase(true)}
+                  aria-label="Open competition trophy case"
+                  className="text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                    <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7 5H4a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4M17 5h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPositionMatrix(true)}
+                  aria-label="Open position matrix radar chart"
+                  className="text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                    <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="5.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M12 3v3M12 18v3M21 12h-3M6 12H3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
               </div>
               {avatarError && <p className="text-red-400 text-xs mt-1">{avatarError}</p>}
             </div>
@@ -258,13 +325,61 @@ export default function ProfileScreen({ session }: Props) {
           </Card>
 
           <div className="flex gap-3">
-            <Card className="flex-1 flex flex-col gap-3">
-              <p className="text-mat-faint text-[10px]">TRAINING SINCE</p>
-              <p className="text-mat-text font-bold text-sm">
-                {trainingSince ? formatMonthYear(trainingSince) : 'Not set'}
-              </p>
+            <Card className="group flex-1 flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-mat-faint text-[10px]">TRAINING SINCE</p>
+                {!editingTrainingSince && (
+                  <button
+                    type="button"
+                    onClick={startEditingTrainingSince}
+                    aria-label="Edit training since"
+                    className="text-mat-faint hover:text-mat-red transition-opacity flex-shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {editingTrainingSince ? (
+                <div className="flex flex-col gap-1.5">
+                  <input
+                    type="date"
+                    value={trainingSinceInput}
+                    onChange={(e) => setTrainingSinceInput(e.target.value)}
+                    autoFocus
+                    disabled={savingTrainingSince}
+                    min="1950-01-01"
+                    max={new Date().toISOString().split('T')[0]}
+                    className="w-full min-h-[32px] rounded-md bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveTrainingSince}
+                      disabled={savingTrainingSince}
+                      className="flex-1 min-h-[28px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
+                    >
+                      {savingTrainingSince ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditingTrainingSince}
+                      disabled={savingTrainingSince}
+                      className="flex-1 min-h-[28px] bg-mat-bg border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {trainingSinceError && <p className="text-red-400 text-xs">{trainingSinceError}</p>}
+                </div>
+              ) : (
+                <p className="text-mat-text font-bold text-sm">
+                  {trainingSince ? formatMonthYear(trainingSince) : 'Not set'}
+                </p>
+              )}
             </Card>
-            <Card className="flex-1 flex flex-col gap-3">
+            <Card className="group flex-1 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-mat-faint text-[10px]">ACADEMY</p>
                 {!editingGym && (
@@ -272,7 +387,7 @@ export default function ProfileScreen({ session }: Props) {
                     type="button"
                     onClick={startEditingGym}
                     aria-label="Edit academy"
-                    className="text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                    className="text-mat-faint hover:text-mat-red transition-opacity flex-shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -286,8 +401,16 @@ export default function ProfileScreen({ session }: Props) {
                     type="text"
                     value={gymInput}
                     onChange={(e) => setGymInput(e.target.value)}
-                    placeholder="Your academy name"
+                    placeholder="Academy name"
                     autoFocus
+                    disabled={savingGym}
+                    className="w-full min-h-[32px] rounded-md bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                  />
+                  <input
+                    type="text"
+                    value={gymUrlInput}
+                    onChange={(e) => setGymUrlInput(e.target.value)}
+                    placeholder="Link, e.g. instagram.com/yourgym"
                     disabled={savingGym}
                     className="w-full min-h-[32px] rounded-md bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
                   />
@@ -311,6 +434,15 @@ export default function ProfileScreen({ session }: Props) {
                   </div>
                   {gymError && <p className="text-red-400 text-xs">{gymError}</p>}
                 </div>
+              ) : gymName && gymUrl ? (
+                <a
+                  href={gymUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-mat-red font-bold text-sm truncate hover:underline"
+                >
+                  {gymName}
+                </a>
               ) : (
                 <p className="text-mat-text font-bold text-sm truncate">{gymName || 'No academy set'}</p>
               )}
@@ -347,6 +479,14 @@ export default function ProfileScreen({ session }: Props) {
             ))}
           </div>
         </>
+      )}
+
+      {showTrophyCase && (
+        <TrophyCase userId={session.user.id} onClose={() => setShowTrophyCase(false)} />
+      )}
+
+      {showPositionMatrix && (
+        <PositionMatrixModal userId={session.user.id} onClose={() => setShowPositionMatrix(false)} />
       )}
     </div>
   );
