@@ -21,7 +21,7 @@ export default function LogScreen({ session }: Props) {
     <div className="flex flex-col gap-6 text-white pb-4">
       <div>
         <p className="text-xs font-semibold text-red-500 tracking-wide">
-          {mode === 'session' ? 'SESSION_INTAKE' : 'COMBAT_FEEDBACK'}
+          {mode === 'session' ? 'SESSION INTAKE' : 'COMBAT FEEDBACK'}
         </p>
         <h1 className="text-2xl font-bold">{mode === 'session' ? 'Log Training' : 'Log Sparring'}</h1>
       </div>

@@ -43,7 +43,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-black pb-20">
+    <div className="min-h-screen bg-mat-bg font-sans pb-20">
       <main className="max-w-xl mx-auto px-4 py-6">{renderScreen()}</main>
       <BottomNav active={activeTab} onChange={setActiveTab} />
     </div>

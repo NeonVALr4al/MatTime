@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
+import Card from './components/Card';
 
 type Technique = { name: string; category: string };
 
@@ -54,37 +55,37 @@ export default function SessionList({ refreshKey }: Props) {
     setSessions((prev) => prev.filter((s) => s.id !== id));
   };
 
-  if (loading) return <p className="text-slate-400 text-sm">Loading sessions...</p>;
-  if (sessions.length === 0) return <p className="text-slate-400 text-sm">No sessions logged yet.</p>;
+  if (loading) return <p className="text-mat-faint text-sm">Loading sessions...</p>;
+  if (sessions.length === 0) return <p className="text-mat-faint text-sm">No sessions logged yet.</p>;
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-bold text-white">Your Sessions</h3>
+      <h3 className="text-lg font-bold text-mat-text">Your Sessions</h3>
       {sessions.map((s) => (
-        <div key={s.id} className="bg-slate-800 rounded-lg p-4 shadow">
+        <Card key={s.id}>
           <div className="flex items-center justify-between">
-            <p className="text-white font-semibold">{s.session_date}</p>
-            <span className="text-xs uppercase tracking-wide text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">
+            <p className="text-mat-text font-bold">{s.session_date}</p>
+            <span className="text-xs uppercase tracking-wide text-mat-red bg-[rgba(255,46,85,0.13)] px-2 py-0.5 rounded">
               {s.class_type}
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-mat-muted mt-1">
             {s.duration_minutes} min · intensity {s.intensity}/5
           </p>
-          {s.notes && <p className="text-sm text-slate-300 italic mt-2">{s.notes}</p>}
+          {s.notes && <p className="text-sm text-mat-muted italic mt-2">{s.notes}</p>}
           {s.techniques.length > 0 && (
-            <p className="text-sm text-slate-400 mt-2">
-              <span className="text-slate-500">Techniques:</span> {s.techniques.map((t) => t.name).join(', ')}
+            <p className="text-sm text-mat-muted mt-2">
+              <span className="text-mat-faint">Techniques:</span> {s.techniques.map((t) => t.name).join(', ')}
             </p>
           )}
           <button
             onClick={() => handleDelete(s.id)}
             disabled={deletingId === s.id}
-            className="mt-3 text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+            className="mt-3 min-h-[44px] px-3 -ml-3 text-sm text-mat-red hover:opacity-80 disabled:opacity-50 transition-all duration-200 active:scale-[0.98]"
           >
             {deletingId === s.id ? 'Deleting...' : 'Delete'}
           </button>
-        </div>
+        </Card>
       ))}
     </div>
   );

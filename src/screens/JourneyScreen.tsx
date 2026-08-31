@@ -10,12 +10,12 @@ type Props = {
 
 const BELT_ORDER = ['white', 'blue', 'purple', 'brown', 'black'];
 
-const BELT_STYLES: Record<string, { bar: string; card: string }> = {
-  white: { bar: 'bg-slate-200', card: 'bg-slate-800' },
-  blue: { bar: 'bg-blue-600', card: 'bg-blue-950/40 border border-blue-900/50' },
-  purple: { bar: 'bg-purple-600', card: 'bg-slate-800' },
-  brown: { bar: 'bg-amber-800', card: 'bg-slate-800' },
-  black: { bar: 'bg-black border border-slate-600', card: 'bg-slate-800' },
+const BELT_BAR_COLOR: Record<string, string> = {
+  white: 'bg-slate-200',
+  blue: 'bg-blue-600',
+  purple: 'bg-purple-600',
+  brown: 'bg-amber-800',
+  black: 'bg-black border border-slate-500',
 };
 
 function monthsAtRank(dateStr: string): number {
@@ -65,57 +65,54 @@ export default function JourneyScreen({ session }: Props) {
   }, [session.user.id, refreshKey]);
 
   const stripePercent = (currentStripes / 4) * 100;
-  const style = BELT_STYLES[currentBelt] ?? BELT_STYLES.white;
+  const barColor = BELT_BAR_COLOR[currentBelt] ?? BELT_BAR_COLOR.white;
 
   return (
-    <div className="flex flex-col gap-6 text-white pb-4">
+    <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div>
-        <p className="text-xs font-semibold text-red-500 tracking-wide">RANK_AND_PROMOTIONS</p>
-        <h1 className="text-2xl font-bold">Belt Journey</h1>
+        <p className="text-xs font-semibold text-mat-red tracking-wide">RANK AND PROMOTIONS</p>
+        <h1 className="text-2xl font-extrabold">Belt Journey</h1>
       </div>
 
-      {/* Current stripes progress */}
-      <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
+      <div className="bg-mat-card rounded-2xl p-4 border border-mat-border">
         <div className="flex items-center justify-between mb-2">
-          <p className="font-semibold text-white">Current Stripes</p>
-          <span className="text-sm text-slate-400">{currentStripes} / 4 STRIPES</span>
+          <p className="font-bold text-mat-text">Current Stripes</p>
+          <span className="text-sm text-mat-muted">{currentStripes} / 4 STRIPES</span>
         </div>
-        <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
-          <div className={`h-full ${style.bar} rounded-full transition-all`} style={{ width: `${stripePercent}%` }} />
+        <div className="w-full h-3 bg-mat-border rounded-full overflow-hidden">
+          <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${stripePercent}%` }} />
         </div>
         {!loading && latestPromotionDate && (
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-xs text-mat-faint mt-2">
             Time at rank: {monthsAtRank(latestPromotionDate)} months
           </p>
         )}
       </div>
 
-      {/* Belt tier list */}
       <div>
-        <p className="text-xs uppercase tracking-wide text-slate-500 mb-2">Stratified_Tiers</p>
+        <p className="text-xs uppercase tracking-wide text-mat-faint mb-2">BELTS</p>
         <div className="flex flex-col gap-2">
           {BELT_ORDER.map((belt) => {
             const isEarned = earnedBelts.has(belt);
             const isCurrent = belt === currentBelt;
-            const beltStyle = BELT_STYLES[belt];
             return (
               <div
                 key={belt}
-                className={`rounded-xl p-4 flex items-center justify-between ${
-                  isCurrent ? beltStyle.card : 'bg-slate-800'
+                className={`rounded-2xl p-4 flex items-center justify-between border ${
+                  isCurrent ? 'bg-[rgba(225,29,72,0.08)] border-[rgba(225,29,72,0.3)]' : 'bg-mat-card border-mat-border'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                      isEarned ? 'bg-red-600' : 'bg-slate-700'
+                      isEarned ? 'bg-mat-red' : 'bg-mat-border'
                     }`}
                   >
                     {isEarned ? '✓' : ''}
                   </div>
                   <div>
-                    <p className="font-semibold text-white capitalize">{belt} Belt</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="font-bold text-mat-text capitalize">{belt} Belt</p>
+                    <p className="text-xs text-mat-muted">
                       {isCurrent ? 'Current Rank' : isEarned ? 'Earned' : 'Not yet earned'}
                     </p>
                   </div>
@@ -126,7 +123,6 @@ export default function JourneyScreen({ session }: Props) {
         </div>
       </div>
 
-      {/* Log a promotion */}
       <PromotionForm userId={session.user.id} onAdded={() => setRefreshKey((k) => k + 1)} />
       <PromotionList refreshKey={refreshKey} />
     </div>

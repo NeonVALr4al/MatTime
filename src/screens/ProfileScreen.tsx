@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
+import Card from '../components/Card';
 
 type Props = { session: Session };
 
@@ -9,7 +10,7 @@ const BELT_BADGE_COLOR: Record<string, string> = {
   blue: 'bg-[#1e3a8a]',
   purple: 'bg-[#581c87]',
   brown: 'bg-[#78350f]',
-  black: 'bg-black border border-[#3f3f46]',
+  black: 'bg-black border border-mat-border-strong',
 };
 
 function formatMonthYear(dateStr: string): string {
@@ -75,84 +76,66 @@ export default function ProfileScreen({ session }: Props) {
   }, [session.user.id]);
 
   const achievements = [
-    {
-      id: 'iron-mat',
-      title: 'Iron Mat',
-      description: '100 classes logged',
-      earned: sessionCount >= 100,
-    },
-    {
-      id: 'first-blood',
-      title: 'First Blood',
-      description: 'Landed first submission',
-      earned: hasFirstSub,
-    },
-    {
-      id: 'consistency',
-      title: 'Consistency',
-      description: '10+ sessions logged',
-      earned: sessionCount >= 10,
-    },
+    { id: 'iron-mat', title: 'Iron Mat', description: '100 classes logged', earned: sessionCount >= 100 },
+    { id: 'first-blood', title: 'First Blood', description: 'Landed first submission', earned: hasFirstSub },
+    { id: 'consistency', title: 'Consistency', description: '10+ sessions logged', earned: sessionCount >= 10 },
   ];
 
   return (
     <div className="flex flex-col gap-5 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-[#e11d48] text-[11px] uppercase tracking-wide">Fighter_Identity</p>
-        <h1 className="font-extrabold text-[#f4f4f5] text-2xl">Combat Profile</h1>
+        <p className="font-semibold text-mat-red text-[11px] uppercase tracking-wide">Fighter Identity</p>
+        <h1 className="font-extrabold text-mat-text text-2xl">Combat Profile</h1>
       </div>
 
       {loading ? (
-        <p className="text-[#71717a] text-sm">Loading...</p>
+        <p className="text-mat-faint text-sm">Loading...</p>
       ) : (
         <>
-          {/* Identity card */}
-          <div className="bg-[#18181b] border border-[#27272a] rounded-2xl p-4 flex gap-4 items-center">
+          <Card className="flex gap-4 items-center">
             <div className="w-16 h-16 rounded-full bg-[#3f3f46] flex items-center justify-center text-xl font-bold text-white flex-shrink-0">
               {displayName.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col gap-1 min-w-0">
-              <p className="font-extrabold text-[#f4f4f5] text-lg truncate">{displayName}</p>
+              <p className="font-extrabold text-mat-text text-lg truncate">{displayName}</p>
               <span className={`${BELT_BADGE_COLOR[belt] ?? BELT_BADGE_COLOR.white} inline-block w-fit px-2 py-0.5 rounded text-[10px] font-bold text-white`}>
                 {belt.toUpperCase()} BELT • {stripes} STRIPE{stripes === 1 ? '' : 'S'}
               </span>
-              <p className="text-[#a1a1aa] text-xs truncate">{gymName}</p>
+              <p className="text-mat-muted text-xs truncate">{gymName}</p>
             </div>
-          </div>
+          </Card>
 
-          {/* Training since + level */}
           <div className="flex gap-3">
-            <div className="flex-1 bg-[#18181b] border border-[#27272a] rounded-2xl p-3 flex flex-col gap-3">
-              <p className="text-[#71717a] text-[10px]">TRAINING_SINCE</p>
-              <p className="text-[#f4f4f5] font-bold text-sm">
+            <Card className="flex-1 flex flex-col gap-3">
+              <p className="text-mat-faint text-[10px]">TRAINING SINCE</p>
+              <p className="text-mat-text font-bold text-sm">
                 {trainingSince ? formatMonthYear(trainingSince) : 'Not set'}
               </p>
-            </div>
-            <div className="flex-1 bg-[#18181b] border border-[#27272a] rounded-2xl p-3 flex flex-col gap-3">
-              <p className="text-[#71717a] text-[10px]">STRIPES_LEVEL</p>
-              <p className="text-[#f4f4f5] font-bold text-sm">Level {stripes}</p>
-            </div>
+            </Card>
+            <Card className="flex-1 flex flex-col gap-3">
+              <p className="text-mat-faint text-[10px]">STRIPES</p>
+              <p className="text-mat-text font-bold text-sm">Level {stripes}</p>
+            </Card>
           </div>
 
-          {/* Achievements */}
           <div className="flex flex-col gap-3">
-            <p className="text-[#71717a] text-[11px]">BATTLE_ACCOLADES_</p>
+            <p className="text-mat-faint text-[11px]">BATTLE ACCOLADES </p>
             {achievements.map((a) => (
-              <div key={a.id} className="bg-[#18181b] border border-[#27272a] rounded-2xl p-3">
+              <Card key={a.id}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        a.earned ? 'bg-[#10b981]/20' : 'bg-[#27272a]'
+                        a.earned ? 'bg-mat-green/20' : 'bg-mat-border-strong'
                       }`}
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke={a.earned ? '#10b981' : '#71717a'} strokeWidth={2} className="w-3.5 h-3.5">
+                      <svg viewBox="0 0 24 24" fill="none" stroke={a.earned ? '#10b981' : '#9a9ba3'} strokeWidth={2} className="w-3.5 h-3.5">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
                     <div>
-                      <p className="text-[#f4f4f5] font-bold text-sm">{a.title}</p>
-                      <p className="text-[#a1a1aa] text-xs">{a.description}</p>
+                      <p className="text-mat-text font-bold text-sm">{a.title}</p>
+                      <p className="text-mat-muted text-xs">{a.description}</p>
                     </div>
                   </div>
                   {a.earned && (
@@ -161,7 +144,7 @@ export default function ProfileScreen({ session }: Props) {
                     </svg>
                   )}
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </>

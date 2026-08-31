@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from './supabaseClient';
 import TechniquePicker from './TechniquePicker';
+import Card from './components/Card';
 
 type Props = {
   userId: string;
@@ -66,54 +67,56 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
   };
 
   const inputClass =
-    'w-full rounded-md bg-slate-700 text-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500';
-  const labelClass = 'block text-sm font-medium text-slate-300 mb-1';
+    'w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
+  const labelClass = 'block text-sm font-medium text-mat-muted mb-1.5';
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-800 rounded-xl p-6 space-y-4 shadow">
-      <h3 className="text-lg font-bold text-white">Log a Session</h3>
+    <form onSubmit={handleSubmit}>
+      <Card className="space-y-4">
+        <h3 className="text-lg font-bold text-mat-text">Log a Session</h3>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Date</label>
-          <input type="date" value={sessionDate} onChange={(e) => setSessionDate(e.target.value)} required className={inputClass} />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>Date</label>
+            <input type="date" value={sessionDate} onChange={(e) => setSessionDate(e.target.value)} required className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Class Type</label>
+            <select value={classType} onChange={(e) => setClassType(e.target.value)} className={inputClass}>
+              <option value="gi">Gi</option>
+              <option value="no-gi">No-Gi</option>
+              <option value="open mat">Open Mat</option>
+              <option value="competition">Competition</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>Duration (minutes)</label>
+            <input type="number" value={duration} onChange={(e) => setDuration(Number(e.target.value))} min={1} className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Intensity (1-5)</label>
+            <input type="number" value={intensity} onChange={(e) => setIntensity(Number(e.target.value))} min={1} max={5} className={inputClass} />
+          </div>
         </div>
+
         <div>
-          <label className={labelClass}>Class Type</label>
-          <select value={classType} onChange={(e) => setClassType(e.target.value)} className={inputClass}>
-            <option value="gi">Gi</option>
-            <option value="no-gi">No-Gi</option>
-            <option value="open mat">Open Mat</option>
-            <option value="competition">Competition</option>
-            <option value="private">Private</option>
-          </select>
+          <label className={labelClass}>Notes</label>
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full rounded-lg bg-mat-bg text-mat-text px-3 py-2.5 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red" />
         </div>
-        <div>
-          <label className={labelClass}>Duration (minutes)</label>
-          <input type="number" value={duration} onChange={(e) => setDuration(Number(e.target.value))} min={1} className={inputClass} />
-        </div>
-        <div>
-          <label className={labelClass}>Intensity (1-5)</label>
-          <input type="number" value={intensity} onChange={(e) => setIntensity(Number(e.target.value))} min={1} max={5} className={inputClass} />
-        </div>
-      </div>
 
-      <div>
-        <label className={labelClass}>Notes</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className={inputClass} />
-      </div>
+        <TechniquePicker selectedIds={techniqueIds} onChange={setTechniqueIds} />
 
-      <TechniquePicker selectedIds={techniqueIds} onChange={setTechniqueIds} />
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
-      {error && <p className="text-red-400 text-sm">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={saving}
-        className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold rounded-lg py-2 transition-colors"
-      >
-        {saving ? 'Saving...' : 'Log Session'}
-      </button>
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full min-h-[44px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+        >
+          {saving ? 'Saving...' : 'Log Session'}
+        </button>
+      </Card>
     </form>
   );
 }

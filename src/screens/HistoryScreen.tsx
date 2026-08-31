@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
+import Card from '../components/Card';
+import PillTag from '../components/PillTag';
 
 type Props = { session: Session };
 
@@ -29,8 +31,8 @@ function formatDate(dateStr: string): string {
 function classBadge(classType: string) {
   const isGi = classType === 'gi';
   return {
-    bg: isGi ? 'bg-[rgba(225,29,72,0.13)]' : 'bg-[#27272a]',
-    text: isGi ? 'text-[#e11d48]' : 'text-[#a1a1aa]',
+    bg: isGi ? 'bg-[rgba(255,46,85,0.13)]' : 'bg-mat-border-strong',
+    text: isGi ? 'text-mat-red' : 'text-mat-muted',
     label: classType === 'no-gi' ? 'No-Gi' : classType === 'open mat' ? 'Open Mat' : classType.charAt(0).toUpperCase() + classType.slice(1),
   };
 }
@@ -68,64 +70,52 @@ export default function HistoryScreen({ session }: Props) {
   return (
     <div className="flex flex-col gap-4 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-[#e11d48] text-[11px] uppercase tracking-wide">Historical_Archive</p>
-        <h1 className="font-extrabold text-[#f4f4f5] text-2xl">Training Logs</h1>
+        <p className="font-semibold text-mat-red text-[11px] uppercase tracking-wide">Historical Archive</p>
+        <h1 className="font-extrabold text-mat-text text-2xl">Training Logs</h1>
       </div>
 
-      {/* Volume cards */}
       <div className="flex gap-3">
-        <div className="flex-1 bg-[#18181b] border border-[#27272a] rounded-2xl p-3 flex flex-col gap-3">
-          <p className="text-[#71717a] text-[11px]">{monthLabel}_VOLUME</p>
-          <p className="text-[#f4f4f5] font-bold text-xl">{monthVolumeHours} Hours</p>
-        </div>
-        <div className="flex-1 bg-[#18181b] border border-[#27272a] rounded-2xl p-3 flex flex-col gap-3">
-          <p className="text-[#71717a] text-[11px]">{monthLabel}_CLASSES</p>
-          <p className="text-[#f4f4f5] font-bold text-xl">{thisMonthSessions.length} Total</p>
-        </div>
+        <Card className="flex-1 flex flex-col gap-3">
+          <p className="text-mat-faint text-[11px]">{monthLabel}VOLUME</p>
+          <p className="text-mat-text font-bold text-xl">{monthVolumeHours} Hours</p>
+        </Card>
+        <Card className="flex-1 flex flex-col gap-3">
+          <p className="text-mat-faint text-[11px]">{monthLabel}CLASSES</p>
+          <p className="text-mat-text font-bold text-xl">{thisMonthSessions.length} Total</p>
+        </Card>
       </div>
 
-      {/* Filter pills */}
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => setFilter(f.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-              filter === f.id ? 'bg-[#e11d48] text-white' : 'bg-[#18181b] text-[#a1a1aa] hover:text-white'
-            }`}
-          >
-            {f.label}
-          </button>
+          <PillTag key={f.id} label={f.label} selected={filter === f.id} onClick={() => setFilter(f.id)} />
         ))}
       </div>
 
-      {/* Session list */}
       <div className="flex flex-col gap-3">
-        {loading && <p className="text-[#71717a] text-sm">Loading...</p>}
+        {loading && <p className="text-mat-faint text-sm">Loading...</p>}
         {!loading && filtered.length === 0 && (
-          <p className="text-[#71717a] text-sm">No sessions match this filter.</p>
+          <p className="text-mat-faint text-sm">No sessions match this filter.</p>
         )}
         {filtered.map((s) => {
           const badge = classBadge(s.class_type);
           return (
-            <div key={s.id} className="bg-[#18181b] border border-[#27272a] rounded-2xl p-3">
+            <Card key={s.id}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`${badge.bg} rounded-lg p-1.5`}>
                     <p className={`${badge.text} font-bold text-[10px]`}>{badge.label}</p>
                   </div>
                   <div>
-                    <p className="text-[#f4f4f5] font-bold text-sm">{s.notes || 'Training Session'}</p>
-                    <p className="text-[#a1a1aa] text-xs">Vanguard HQ</p>
+                    <p className="text-mat-text font-bold text-sm">{s.notes || 'Training Session'}</p>
+                    <p className="text-mat-muted text-xs">Vanguard HQ</p>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-[#f4f4f5] font-bold text-xs">{s.duration_minutes ?? '--'} min</p>
-                  <p className="text-[#71717a] text-[10px]">{formatDate(s.session_date)}</p>
+                  <p className="text-mat-text font-bold text-xs">{s.duration_minutes ?? '--'} min</p>
+                  <p className="text-mat-faint text-[10px]">{formatDate(s.session_date)}</p>
                 </div>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>

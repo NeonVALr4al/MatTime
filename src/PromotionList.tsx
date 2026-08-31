@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
+import Card from './components/Card';
 
 type Promotion = {
   id: string;
@@ -14,7 +15,7 @@ const BELT_COLORS: Record<string, string> = {
   blue: 'bg-blue-600 text-white',
   purple: 'bg-purple-600 text-white',
   brown: 'bg-amber-800 text-white',
-  black: 'bg-black text-white border border-slate-600',
+  black: 'bg-black text-white border border-mat-border-strong',
 };
 
 type Props = { refreshKey: number };
@@ -47,28 +48,28 @@ export default function PromotionList({ refreshKey }: Props) {
     setPromotions((prev) => prev.filter((p) => p.id !== id));
   };
 
-  if (loading) return <p className="text-slate-400 text-sm">Loading promotions...</p>;
-  if (promotions.length === 0) return <p className="text-slate-400 text-sm">No promotions logged yet.</p>;
+  if (loading) return <p className="text-mat-faint text-sm">Loading promotions...</p>;
+  if (promotions.length === 0) return <p className="text-mat-faint text-sm">No promotions logged yet.</p>;
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-bold text-white">Belt Timeline</h3>
+      <h3 className="text-lg font-bold text-mat-text">Promotion History</h3>
       {promotions.map((p) => (
-        <div key={p.id} className="bg-slate-800 rounded-lg p-4 shadow flex items-center justify-between">
+        <Card key={p.id} className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className={`text-xs font-semibold px-2 py-1 rounded ${BELT_COLORS[p.belt] ?? 'bg-slate-600 text-white'}`}>
+            <span className={`text-xs font-semibold px-2 py-1 rounded ${BELT_COLORS[p.belt] ?? 'bg-mat-border-strong text-mat-text'}`}>
               {p.belt.toUpperCase()} · {p.stripes} stripe{p.stripes === 1 ? '' : 's'}
             </span>
-            <span className="text-sm text-slate-400">{p.promotion_date}</span>
+            <span className="text-sm text-mat-muted">{p.promotion_date}</span>
           </div>
           <button
             onClick={() => handleDelete(p.id)}
             disabled={deletingId === p.id}
-            className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+            className="min-h-[44px] px-3 text-sm text-mat-red hover:opacity-80 disabled:opacity-50 transition-all duration-200 active:scale-[0.98]"
           >
             {deletingId === p.id ? '...' : 'Delete'}
           </button>
-        </div>
+        </Card>
       ))}
     </div>
   );

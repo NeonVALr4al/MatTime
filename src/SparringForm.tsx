@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from './supabaseClient';
+import Card from './components/Card';
 
 type Props = {
   userId: string;
@@ -48,85 +49,91 @@ export default function SparringForm({ userId, onAdded }: Props) {
   };
 
   const inputClass =
-    'w-full rounded-md bg-slate-700 text-white placeholder-slate-400 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500';
-  const labelClass = 'block text-sm font-medium text-slate-300 mb-1';
+    'w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
+  const labelClass = 'block text-sm font-medium text-mat-muted mb-1.5';
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-800 rounded-xl p-6 space-y-4 shadow">
-      <h3 className="text-lg font-bold text-white">Log a Roll</h3>
+    <form onSubmit={handleSubmit}>
+      <Card className="space-y-4">
+        <h3 className="text-lg font-bold text-mat-text">Log a Roll</h3>
 
-      <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>Date</label>
+            <input type="date" value={rollDate} onChange={(e) => setRollDate(e.target.value)} required className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Training Partner</label>
+            <input
+              type="text"
+              placeholder="e.g. training partner, blue belt"
+              value={opponentNote}
+              onChange={(e) => setOpponentNote(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+        </div>
+        
+                <div>
+          <label className={labelClass}>Position</label>
+          <div className="flex gap-2">
+            <select
+              value={outcome}
+              onChange={(e) => setOutcome(e.target.value)}
+              className="min-h-[44px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red w-40 flex-shrink-0"
+            >
+              {OUTCOMES.map((o) => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="e.g. mount, closed guard"
+              value={position}
+              onChange={(e) => setPosition(e.target.value)}
+              className="min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red flex-1 min-w-0"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>Submission Landed</label>
+            <input
+              type="text"
+              placeholder="e.g. triangle choke"
+              value={submissionLanded}
+              onChange={(e) => setSubmissionLanded(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Submission Received</label>
+            <input
+              type="text"
+              placeholder="optional"
+              value={submissionReceived}
+              onChange={(e) => setSubmissionReceived(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+        </div>
+
         <div>
-          <label className={labelClass}>Date</label>
-          <input type="date" value={rollDate} onChange={(e) => setRollDate(e.target.value)} required className={inputClass} />
+          <label className={labelClass}>Notes</label>
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full rounded-lg bg-mat-bg text-mat-text px-3 py-2.5 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red" />
         </div>
-        <div>
-          <label className={labelClass}>Training Partner</label>
-          <input
-            type="text"
-            placeholder="e.g. training partner, blue belt"
-            value={opponentNote}
-            onChange={(e) => setOpponentNote(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-      </div>
 
-      <div>
-        <label className={labelClass}>Position</label>
-        <div className="flex gap-2">
-          <select value={outcome} onChange={(e) => setOutcome(e.target.value)} className={`${inputClass} w-40 flex-shrink-0`}>
-            {OUTCOMES.map((o) => (
-              <option key={o} value={o}>{o}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            placeholder="e.g. mount, closed guard"
-            value={position}
-            onChange={(e) => setPosition(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-      </div>
+        {error && <p className="text-red-400 text-sm">{error}</p>}
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Submission Landed</label>
-          <input
-            type="text"
-            placeholder="e.g. triangle choke"
-            value={submissionLanded}
-            onChange={(e) => setSubmissionLanded(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Submission Received</label>
-          <input
-            type="text"
-            placeholder="optional"
-            value={submissionReceived}
-            onChange={(e) => setSubmissionReceived(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className={labelClass}>Notes</label>
-        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className={inputClass} />
-      </div>
-
-      {error && <p className="text-red-400 text-sm">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={saving}
-        className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold rounded-lg py-2 transition-colors"
-      >
-        {saving ? 'Saving...' : 'Log Roll'}
-      </button>
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full min-h-[44px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+        >
+          {saving ? 'Saving...' : 'Log Roll'}
+        </button>
+      </Card>
     </form>
   );
 }

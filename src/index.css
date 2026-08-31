@@ -1,1 +1,18 @@
-   @import "tailwindcss";
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+
+  --color-mat-bg: #0a0b0e;
+  --color-mat-card: #12141c;
+  --color-mat-border: rgba(255, 255, 255, 0.1);
+  --color-mat-border-strong: rgba(38, 38, 38, 0.6);
+  --color-mat-red: #ff2e55;
+  --color-mat-green: #10b981;
+  --color-mat-text: #f4f4f5;
+  --color-mat-muted: #c1c2c7;
+  --color-mat-faint: #9a9ba3;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap');

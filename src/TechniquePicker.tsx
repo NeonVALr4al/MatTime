@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
+import Card from './components/Card';
+import PillTag from './components/PillTag';
 
 type Technique = {
   id: string;
@@ -55,21 +57,19 @@ export default function TechniquePicker({ selectedIds, onChange }: Props) {
   };
 
   return (
-    <div className="border border-slate-700 rounded-lg p-4 bg-slate-800/50">
-      <p className="text-sm font-semibold text-slate-300 mb-2">Techniques drilled</p>
+    <Card>
+      <p className="text-sm font-semibold text-mat-muted mb-3">Techniques drilled</p>
 
-      <div className="max-h-36 overflow-y-auto space-y-1 mb-3 pr-1">
-        {techniques.length === 0 && <p className="text-sm text-slate-500 italic">No techniques yet, add one below.</p>}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {techniques.length === 0 && <p className="text-sm text-mat-faint italic">No techniques yet, add one below.</p>}
         {techniques.map((t) => (
-          <label key={t.id} className="flex items-center gap-2 text-sm text-slate-200 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={selectedIds.includes(t.id)}
-              onChange={() => toggle(t.id)}
-              className="rounded accent-blue-600"
-            />
-            {t.name} <span className="text-slate-500">({t.category})</span>
-          </label>
+          <PillTag
+            key={t.id}
+            label={t.name}
+            sublabel={`(${t.category})`}
+            selected={selectedIds.includes(t.id)}
+            onClick={() => toggle(t.id)}
+          />
         ))}
       </div>
 
@@ -79,12 +79,12 @@ export default function TechniquePicker({ selectedIds, onChange }: Props) {
           placeholder="New technique name"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          className="flex-1 min-w-0 rounded-md bg-slate-700 text-white placeholder-slate-400 px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 min-w-0 min-h-[44px] rounded-lg bg-mat-bg border border-mat-border-strong text-mat-text placeholder-mat-faint px-3 text-sm outline-none transition-all duration-200 focus:border-mat-red"
         />
         <select
           value={newCategory}
           onChange={(e) => setNewCategory(e.target.value)}
-          className="rounded-md bg-slate-700 text-white px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="min-h-[44px] rounded-lg bg-mat-bg border border-mat-border-strong text-mat-text px-2 text-sm outline-none transition-all duration-200 focus:border-mat-red"
         >
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -94,12 +94,12 @@ export default function TechniquePicker({ selectedIds, onChange }: Props) {
           type="button"
           onClick={handleAddTechnique}
           disabled={adding || !newName.trim()}
-          className="rounded-md bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm px-3 py-1.5 transition-colors"
+          className="min-h-[44px] px-4 rounded-lg bg-mat-red hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
         >
           {adding ? '...' : 'Add'}
         </button>
       </div>
       {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-    </div>
+    </Card>
   );
 }
