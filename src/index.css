@@ -10,9 +10,23 @@
   --color-mat-border-strong: rgba(38, 38, 38, 0.6);
   --color-mat-red: #ff2e55;
   --color-mat-green: #10b981;
+  --color-mat-orange: #f59e0b;
   --color-mat-text: #f4f4f5;
   --color-mat-muted: #c1c2c7;
   --color-mat-faint: #9a9ba3;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap');
+
+html,
+body,
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

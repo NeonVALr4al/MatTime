@@ -17,6 +17,8 @@ function formatMonthYear(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+
 export default function ProfileScreen({ session }: Props) {
   const [displayName, setDisplayName] = useState('');
   const [gymName, setGymName] = useState('');
@@ -26,6 +28,14 @@ export default function ProfileScreen({ session }: Props) {
   const [sessionCount, setSessionCount] = useState(0);
   const [hasFirstSub, setHasFirstSub] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+  const [signingOut, setSigningOut] = useState(false);
+  const [editingGym, setEditingGym] = useState(false);
+  const [gymInput, setGymInput] = useState('');
+  const [savingGym, setSavingGym] = useState(false);
+  const [gymError, setGymError] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -33,16 +43,17 @@ export default function ProfileScreen({ session }: Props) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, gym_name, current_belt, current_stripes, created_at')
+        .select('display_name, gym_name, current_belt, current_stripes, created_at, avatar_url')
         .eq('id', session.user.id)
         .single();
 
       if (profile) {
         setDisplayName(profile.display_name || session.user.email?.split('@')[0] || 'Grappler');
-        setGymName(profile.gym_name || 'No academy set');
+        setGymName(profile.gym_name || '');
         setBelt(profile.current_belt);
         setStripes(profile.current_stripes);
         setTrainingSince(profile.created_at);
+        setAvatarUrl(profile.avatar_url);
       }
 
       const { data: promotions } = await supabase
@@ -75,6 +86,96 @@ export default function ProfileScreen({ session }: Props) {
     load();
   }, [session.user.id]);
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setAvatarError('');
+
+    if (!file.type.startsWith('image/')) {
+      setAvatarError('Please choose an image file.');
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setAvatarError('Image must be under 5MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+
+    const ext = file.name.split('.').pop() || 'jpg';
+    const path = `${session.user.id}/avatar.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (uploadError) {
+      setUploadingAvatar(false);
+      setAvatarError(uploadError.message);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(path);
+    const publicUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: publicUrl })
+      .eq('id', session.user.id);
+
+    setUploadingAvatar(false);
+
+    if (updateError) {
+      setAvatarError(updateError.message);
+      return;
+    }
+
+    setAvatarUrl(publicUrl);
+  };
+
+  const startEditingGym = () => {
+    setGymError('');
+    setGymInput(gymName);
+    setEditingGym(true);
+  };
+
+  const cancelEditingGym = () => {
+    setEditingGym(false);
+    setGymError('');
+  };
+
+  const handleSaveGym = async () => {
+    setGymError('');
+    setSavingGym(true);
+
+    const trimmed = gymInput.trim();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ gym_name: trimmed || null })
+      .eq('id', session.user.id);
+
+    setSavingGym(false);
+
+    if (error) {
+      setGymError(error.message);
+      return;
+    }
+
+    setGymName(trimmed);
+    setEditingGym(false);
+  };
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      setSigningOut(false);
+      alert(`Failed to sign out: ${error.message}`);
+    }
+  };
+
   const achievements = [
     { id: 'iron-mat', title: 'Iron Mat', description: '100 classes logged', earned: sessionCount >= 100 },
     { id: 'first-blood', title: 'First Blood', description: 'Landed first submission', earned: hasFirstSub },
@@ -93,16 +194,67 @@ export default function ProfileScreen({ session }: Props) {
       ) : (
         <>
           <Card className="flex gap-4 items-center">
-            <div className="w-16 h-16 rounded-full bg-[#3f3f46] flex items-center justify-center text-xl font-bold text-white flex-shrink-0">
-              {displayName.charAt(0).toUpperCase()}
+            <div className="relative w-16 h-16 flex-shrink-0">
+              <div className="w-16 h-16 rounded-full bg-[#3f3f46] overflow-hidden flex items-center justify-center text-xl font-bold text-white">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  displayName.charAt(0).toUpperCase()
+                )}
+              </div>
+              <label
+                htmlFor="avatar-upload"
+                aria-label="Change profile picture"
+                className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-mat-red border-2 border-mat-card flex items-center justify-center cursor-pointer transition-opacity ${
+                  uploadingAvatar ? 'opacity-50 pointer-events-none' : 'hover:opacity-90'
+                }`}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-3 h-3">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="13" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </label>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+                disabled={uploadingAvatar}
+              />
             </div>
             <div className="flex flex-col gap-1 min-w-0">
               <p className="font-extrabold text-mat-text text-lg truncate">{displayName}</p>
-              <span className={`${BELT_BADGE_COLOR[belt] ?? BELT_BADGE_COLOR.white} inline-block w-fit px-2 py-0.5 rounded text-[10px] font-bold text-white`}>
-                {belt.toUpperCase()} BELT • {stripes} STRIPE{stripes === 1 ? '' : 'S'}
-              </span>
-              <p className="text-mat-muted text-xs truncate">{gymName}</p>
+              <div className="flex items-center gap-1.5">
+                <span className={`${BELT_BADGE_COLOR[belt] ?? BELT_BADGE_COLOR.white} inline-block w-fit px-2 py-0.5 rounded text-[10px] font-bold text-white`}>
+                  {belt.toUpperCase()} BELT
+                </span>
+                <div
+                  className="flex items-center gap-[3px] bg-black rounded-[2px] px-1.5 py-1"
+                  aria-label={`${stripes} stripe${stripes === 1 ? '' : 's'}`}
+                  title={`${stripes} stripe${stripes === 1 ? '' : 's'}`}
+                >
+                  {[0, 1, 2, 3].map((i) => (
+                    <span
+                      key={i}
+                      className={`w-[3px] h-3 rounded-[1px] ${i < stripes ? 'bg-white' : 'bg-white/15'}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              {avatarError && <p className="text-red-400 text-xs mt-1">{avatarError}</p>}
             </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              aria-label="Sign out"
+              className="ml-auto flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
           </Card>
 
           <div className="flex gap-3">
@@ -113,8 +265,55 @@ export default function ProfileScreen({ session }: Props) {
               </p>
             </Card>
             <Card className="flex-1 flex flex-col gap-3">
-              <p className="text-mat-faint text-[10px]">STRIPES</p>
-              <p className="text-mat-text font-bold text-sm">Level {stripes}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-mat-faint text-[10px]">ACADEMY</p>
+                {!editingGym && (
+                  <button
+                    type="button"
+                    onClick={startEditingGym}
+                    aria-label="Edit academy"
+                    className="text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {editingGym ? (
+                <div className="flex flex-col gap-1.5">
+                  <input
+                    type="text"
+                    value={gymInput}
+                    onChange={(e) => setGymInput(e.target.value)}
+                    placeholder="Your academy name"
+                    autoFocus
+                    disabled={savingGym}
+                    className="w-full min-h-[32px] rounded-md bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveGym}
+                      disabled={savingGym}
+                      className="flex-1 min-h-[28px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
+                    >
+                      {savingGym ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditingGym}
+                      disabled={savingGym}
+                      className="flex-1 min-h-[28px] bg-mat-bg border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {gymError && <p className="text-red-400 text-xs">{gymError}</p>}
+                </div>
+              ) : (
+                <p className="text-mat-text font-bold text-sm truncate">{gymName || 'No academy set'}</p>
+              )}
             </Card>
           </div>
 

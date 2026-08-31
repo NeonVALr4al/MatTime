@@ -10,12 +10,16 @@ type Props = {
 
 const BELT_ORDER = ['white', 'blue', 'purple', 'brown', 'black'];
 
-const BELT_BAR_COLOR: Record<string, string> = {
-  white: 'bg-slate-200',
-  blue: 'bg-blue-600',
-  purple: 'bg-purple-600',
-  brown: 'bg-amber-800',
-  black: 'bg-black border border-slate-500',
+const BELT_COLOR: Record<string, string> = {
+  white: 'bg-[#e4e4e7]',
+  blue: 'bg-[#1d4ed8]',
+  purple: 'bg-[#7c3aed]',
+  brown: 'bg-[#78350f]',
+  black: 'bg-black border border-mat-border-strong',
+};
+
+const TIP_COLOR: Record<string, string> = {
+  black: 'bg-[#8c1c1c]',
 };
 
 function monthsAtRank(dateStr: string): number {
@@ -53,19 +57,14 @@ export default function JourneyScreen({ session }: Props) {
         .eq('user_id', session.user.id)
         .order('promotion_date', { ascending: false });
 
-      if (promotions && promotions.length > 0) {
-        setLatestPromotionDate(promotions[0].promotion_date);
-        setEarnedBelts(new Set(['white', ...promotions.map((p) => p.belt)]));
-      }
+      setLatestPromotionDate(promotions && promotions.length > 0 ? promotions[0].promotion_date : null);
+      setEarnedBelts(new Set(['white', ...(promotions ?? []).map((p) => p.belt)]));
 
       setLoading(false);
     };
 
     load();
   }, [session.user.id, refreshKey]);
-
-  const stripePercent = (currentStripes / 4) * 100;
-  const barColor = BELT_BAR_COLOR[currentBelt] ?? BELT_BAR_COLOR.white;
 
   return (
     <div className="flex flex-col gap-6 text-mat-text pb-4">
@@ -75,12 +74,20 @@ export default function JourneyScreen({ session }: Props) {
       </div>
 
       <div className="bg-mat-card rounded-2xl p-4 border border-mat-border">
-        <div className="flex items-center justify-between mb-2">
-          <p className="font-bold text-mat-text">Current Stripes</p>
-          <span className="text-sm text-mat-muted">{currentStripes} / 4 STRIPES</span>
-        </div>
-        <div className="w-full h-3 bg-mat-border rounded-full overflow-hidden">
-          <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${stripePercent}%` }} />
+        <p className="font-bold text-mat-text mb-3">Current Rank</p>
+        <div className={`relative w-full h-7 rounded-lg overflow-hidden ${BELT_COLOR[currentBelt] ?? BELT_COLOR.white}`}>
+          <div
+            className={`absolute right-0 top-0 h-full flex items-center gap-1 px-2 ${TIP_COLOR[currentBelt] ?? 'bg-black'}`}
+            aria-label={`${currentStripes} stripe${currentStripes === 1 ? '' : 's'}`}
+            title={`${currentStripes} stripe${currentStripes === 1 ? '' : 's'}`}
+          >
+            {[0, 1, 2, 3].map((i) => (
+              <span
+                key={i}
+                className={`w-1 h-4 rounded-[1px] ${i < currentStripes ? 'bg-white' : 'bg-white/15'}`}
+              />
+            ))}
+          </div>
         </div>
         {!loading && latestPromotionDate && (
           <p className="text-xs text-mat-faint mt-2">
@@ -98,25 +105,29 @@ export default function JourneyScreen({ session }: Props) {
             return (
               <div
                 key={belt}
-                className={`rounded-2xl p-4 flex items-center justify-between border ${
+                className={`rounded-2xl p-3 flex items-center gap-4 border ${
                   isCurrent ? 'bg-[rgba(225,29,72,0.08)] border-[rgba(225,29,72,0.3)]' : 'bg-mat-card border-mat-border'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className={`relative flex-1 h-10 rounded-lg overflow-hidden ${BELT_COLOR[belt] ?? BELT_COLOR.white}`}>
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
-                      isEarned ? 'bg-mat-red' : 'bg-mat-border'
-                    }`}
+                    className={`absolute right-0 top-0 h-full flex items-center gap-1 px-2.5 ${TIP_COLOR[belt] ?? 'bg-black'}`}
+                    aria-label={`${belt} belt stripe tip`}
                   >
-                    {isEarned ? '✓' : ''}
-                  </div>
-                  <div>
-                    <p className="font-bold text-mat-text capitalize">{belt} Belt</p>
-                    <p className="text-xs text-mat-muted">
-                      {isCurrent ? 'Current Rank' : isEarned ? 'Earned' : 'Not yet earned'}
-                    </p>
+                    {[0, 1, 2, 3].map((i) => {
+                      const filled = isCurrent ? i < currentStripes : isEarned;
+                      return (
+                        <span
+                          key={i}
+                          className={`w-1 h-5 rounded-[1px] ${filled ? 'bg-white' : 'bg-white/15'}`}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
+                <p className="text-sm text-mat-muted flex-shrink-0 whitespace-nowrap">
+                  {isCurrent ? 'Current Rank' : isEarned ? 'Earned' : 'Not yet earned'}
+                </p>
               </div>
             );
           })}
@@ -124,7 +135,11 @@ export default function JourneyScreen({ session }: Props) {
       </div>
 
       <PromotionForm userId={session.user.id} onAdded={() => setRefreshKey((k) => k + 1)} />
-      <PromotionList refreshKey={refreshKey} />
+      <PromotionList
+        userId={session.user.id}
+        refreshKey={refreshKey}
+        onChanged={() => setRefreshKey((k) => k + 1)}
+      />
     </div>
   );
 }

@@ -19,9 +19,9 @@ const BELT_COLORS: Record<string, string> = {
   black: "bg-black text-white border border-mat-border-strong",
 };
 
-type Props = { refreshKey: number };
+type Props = { userId: string; refreshKey: number; onChanged?: () => void };
 
-export default function PromotionList({ refreshKey }: Props) {
+export default function PromotionList({ userId, refreshKey, onChanged }: Props) {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -48,9 +48,38 @@ export default function PromotionList({ refreshKey }: Props) {
       .from("belt_promotions")
       .delete()
       .eq("id", id);
+
+    if (error) {
+      setDeletingId(null);
+      return alert(`Failed to delete: ${error.message}`);
+    }
+
+    const { data: latest } = await supabase
+      .from("belt_promotions")
+      .select("belt, stripes")
+      .eq("user_id", userId)
+      .order("promotion_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({
+        current_belt: latest?.belt ?? "white",
+        current_stripes: latest?.stripes ?? 0,
+      })
+      .eq("id", userId);
+
     setDeletingId(null);
-    if (error) return alert(`Failed to delete: ${error.message}`);
+
+    if (profileError)
+      return alert(
+        `Promotion removed, but rank update failed: ${profileError.message}`,
+      );
+
     setPromotions((prev) => prev.filter((p) => p.id !== id));
+    onChanged?.();
   };
 
   if (loading)
@@ -61,7 +90,7 @@ export default function PromotionList({ refreshKey }: Props) {
   return (
     <div className="space-y-3">
       <h3 className="text-lg font-bold text-mat-text">Promotion History</h3>
-      <div className="max-h-[300px] overflow-y-auto space-y-3 pr-1">
+      <div className="max-h-[300px] overflow-y-auto no-scrollbar space-y-3 pr-1">
         {promotions.map((p) => (
           <Card key={p.id} className="flex items-center justify-between">
             <div className="flex flex-col gap-3">

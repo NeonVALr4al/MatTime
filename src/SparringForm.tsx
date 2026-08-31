@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
 
@@ -6,6 +6,8 @@ type Props = {
   userId: string;
   onAdded: () => void;
 };
+
+type Technique = { id: string; name: string };
 
 const OUTCOMES = ['Won from', 'Lost from', 'Neutral position'];
 
@@ -17,8 +19,21 @@ export default function SparringForm({ userId, onAdded }: Props) {
   const [submissionLanded, setSubmissionLanded] = useState('');
   const [submissionReceived, setSubmissionReceived] = useState('');
   const [notes, setNotes] = useState('');
+  const [submissionTechniques, setSubmissionTechniques] = useState<Technique[]>([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const loadSubmissions = async () => {
+      const { data } = await supabase
+        .from('techniques')
+        .select('id, name')
+        .eq('category', 'submission')
+        .order('name');
+      setSubmissionTechniques(data ?? []);
+    };
+    loadSubmissions();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +66,8 @@ export default function SparringForm({ userId, onAdded }: Props) {
   const inputClass =
     'w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
   const labelClass = 'block text-sm font-medium text-mat-muted mb-1.5';
+  const selectClass =
+    'min-h-[44px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
 
   return (
     <form onSubmit={handleSubmit}>
@@ -73,14 +90,14 @@ export default function SparringForm({ userId, onAdded }: Props) {
             />
           </div>
         </div>
-        
-                <div>
+
+        <div>
           <label className={labelClass}>Position</label>
           <div className="flex gap-2">
             <select
               value={outcome}
               onChange={(e) => setOutcome(e.target.value)}
-              className="min-h-[44px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red w-40 flex-shrink-0"
+              className={`${selectClass} w-40 flex-shrink-0`}
             >
               {OUTCOMES.map((o) => (
                 <option key={o} value={o}>{o}</option>
@@ -91,7 +108,7 @@ export default function SparringForm({ userId, onAdded }: Props) {
               placeholder="e.g. mount, closed guard"
               value={position}
               onChange={(e) => setPosition(e.target.value)}
-              className="min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red flex-1 min-w-0"
+              className={`${inputClass} flex-1 min-w-0`}
             />
           </div>
         </div>
@@ -99,23 +116,29 @@ export default function SparringForm({ userId, onAdded }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Submission Landed</label>
-            <input
-              type="text"
-              placeholder="e.g. triangle choke"
+            <select
               value={submissionLanded}
               onChange={(e) => setSubmissionLanded(e.target.value)}
-              className={inputClass}
-            />
+              className={`${selectClass} w-full`}
+            >
+              <option value="">None</option>
+              {submissionTechniques.map((t) => (
+                <option key={t.id} value={t.name}>{t.name}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className={labelClass}>Submission Received</label>
-            <input
-              type="text"
-              placeholder="optional"
+            <select
               value={submissionReceived}
               onChange={(e) => setSubmissionReceived(e.target.value)}
-              className={inputClass}
-            />
+              className={`${selectClass} w-full`}
+            >
+              <option value="">None</option>
+              {submissionTechniques.map((t) => (
+                <option key={t.id} value={t.name}>{t.name}</option>
+              ))}
+            </select>
           </div>
         </div>
 

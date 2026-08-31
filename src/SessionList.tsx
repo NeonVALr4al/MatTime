@@ -17,6 +17,17 @@ type Session = {
 
 type Props = { refreshKey: number };
 
+const INTENSITY_INFO: Record<number, { label: string; colorClass: string }> = {
+  1: { label: 'Light', colorClass: 'text-mat-green' },
+  3: { label: 'Medium', colorClass: 'text-mat-orange' },
+  5: { label: 'Hard', colorClass: 'text-mat-red' },
+};
+
+function getIntensityInfo(intensity: number | null): { label: string; colorClass: string } | null {
+  if (intensity === null) return null;
+  return INTENSITY_INFO[intensity] ?? { label: `${intensity}/5`, colorClass: 'text-mat-muted' };
+}
+
 export default function SessionList({ refreshKey }: Props) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,8 +73,10 @@ export default function SessionList({ refreshKey }: Props) {
     return (
     <div className="space-y-3">
       <h3 className="text-lg font-bold text-mat-text">Your Sessions</h3>
-      <div className="max-h-[420px] overflow-y-auto space-y-3 pr-1">
-        {sessions.map((s) => (
+      <div className="max-h-[420px] overflow-y-auto no-scrollbar space-y-3 pr-1">
+        {sessions.map((s) => {
+          const intensityInfo = getIntensityInfo(s.intensity);
+          return (
                 <Card key={s.id}>
           <div className="flex items-center justify-between">
             <p className="text-mat-text font-bold">{s.session_date}</p>
@@ -75,7 +88,13 @@ export default function SessionList({ refreshKey }: Props) {
             </div>
           </div>
           <p className="text-sm text-mat-muted mt-1">
-            {s.duration_minutes} min · intensity {s.intensity}/5
+            {s.duration_minutes} min
+            {intensityInfo && (
+              <>
+                {' · intensity '}
+                <span className={`font-semibold ${intensityInfo.colorClass}`}>{intensityInfo.label}</span>
+              </>
+            )}
           </p>
           {s.notes && <p className="text-sm text-mat-muted italic mt-2">{s.notes}</p>}
           {s.techniques.length > 0 && (
@@ -84,7 +103,8 @@ export default function SessionList({ refreshKey }: Props) {
             </p>
           )}
         </Card>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

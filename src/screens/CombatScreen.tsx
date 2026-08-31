@@ -16,6 +16,33 @@ type ActivityItem = {
   durationLabel: string;
 };
 
+type ClassSlot = {
+  id: string;
+  day_of_week: number;
+  start_time: string;
+  label: string | null;
+};
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAY_ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+function formatTime(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+function nextOccurrence(dayOfWeek: number, startTime: string): Date {
+  const [h, m] = startTime.split(':').map(Number);
+  const now = new Date();
+  const result = new Date(now);
+  result.setDate(now.getDate() + ((dayOfWeek - now.getDay() + 7) % 7));
+  result.setHours(h, m, 0, 0);
+  if (result < now) result.setDate(result.getDate() + 7);
+  return result;
+}
+
 function timeAgo(dateStr: string): string {
   const date = new Date(dateStr);
   const today = new Date();
@@ -37,9 +64,27 @@ function startOfWeek(): string {
 
 export default function CombatScreen({ session, onNavigate }: Props) {
   const [displayName, setDisplayName] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [weeklyCount, setWeeklyCount] = useState(0);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [schedule, setSchedule] = useState<ClassSlot[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newDay, setNewDay] = useState(new Date().getDay());
+  const [newTime, setNewTime] = useState('18:00');
+  const [newLabel, setNewLabel] = useState('');
+  const [savingSlot, setSavingSlot] = useState(false);
+  const [scheduleError, setScheduleError] = useState('');
+  const [deletingSlotId, setDeletingSlotId] = useState<string | null>(null);
+
+  const loadSchedule = async () => {
+    const { data } = await supabase
+      .from('class_schedule')
+      .select('id, day_of_week, start_time, label')
+      .order('day_of_week')
+      .order('start_time');
+    setSchedule(data ?? []);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -47,10 +92,13 @@ export default function CombatScreen({ session, onNavigate }: Props) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name')
+        .select('display_name, avatar_url')
         .eq('id', session.user.id)
         .single();
       setDisplayName(profile?.display_name || session.user.email?.split('@')[0] || 'Grappler');
+      setAvatarUrl(profile?.avatar_url ?? null);
+
+      await loadSchedule();
 
       const weekStart = startOfWeek();
       const { count } = await supabase
@@ -98,6 +146,50 @@ export default function CombatScreen({ session, onNavigate }: Props) {
     load();
   }, [session.user.id]);
 
+  const handleAddSlot = async () => {
+    setScheduleError('');
+    setSavingSlot(true);
+
+    const { data, error } = await supabase
+      .from('class_schedule')
+      .insert({
+        user_id: session.user.id,
+        day_of_week: newDay,
+        start_time: newTime,
+        label: newLabel.trim() || null,
+      })
+      .select('id, day_of_week, start_time, label')
+      .single();
+
+    setSavingSlot(false);
+
+    if (error) {
+      setScheduleError(error.message);
+      return;
+    }
+
+    setSchedule((prev) =>
+      [...prev, data].sort((a, b) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time))
+    );
+    setNewLabel('');
+    setShowAddForm(false);
+  };
+
+  const handleDeleteSlot = async (id: string) => {
+    setDeletingSlotId(id);
+    const { error } = await supabase.from('class_schedule').delete().eq('id', id);
+    setDeletingSlotId(null);
+    if (error) return alert(`Failed to remove class time: ${error.message}`);
+    setSchedule((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const nextClass = schedule.length
+    ? schedule.reduce((soonest, s) => {
+        const t = nextOccurrence(s.day_of_week, s.start_time);
+        return !soonest || t < soonest.time ? { slot: s, time: t } : soonest;
+      }, null as { slot: ClassSlot; time: Date } | null)
+    : null;
+
   return (
     <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div className="flex items-center justify-between">
@@ -108,9 +200,13 @@ export default function CombatScreen({ session, onNavigate }: Props) {
         <button
           type="button"
           onClick={() => onNavigate('profile')}
-          className="w-10 h-10 rounded-full bg-mat-card flex items-center justify-center text-sm font-bold border-2 border-mat-red flex-shrink-0"
+          className="w-10 h-10 rounded-full bg-mat-card overflow-hidden flex items-center justify-center text-sm font-bold flex-shrink-0"
         >
-          {displayName ? displayName.charAt(0).toUpperCase() : '?'}
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            displayName ? displayName.charAt(0).toUpperCase() : '?'
+          )}
         </button>
       </div>
 
@@ -142,9 +238,88 @@ export default function CombatScreen({ session, onNavigate }: Props) {
       </div>
 
       <div className="bg-[rgba(225,29,72,0.08)] border border-[rgba(225,29,72,0.25)] rounded-2xl p-4">
-        <p className="text-[10px] uppercase tracking-wide text-mat-red">Upcoming Class</p>
-        <p className="font-bold text-mat-text mt-1">No upcoming class scheduled</p>
-        <p className="text-xs text-mat-muted mt-1">Class scheduling isn't part of MatTime yet</p>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] uppercase tracking-wide text-mat-red">Upcoming Class</p>
+          <button
+            type="button"
+            onClick={() => setShowAddForm((v) => !v)}
+            className="text-[10px] font-bold uppercase tracking-wide text-mat-red hover:opacity-80 transition-opacity"
+          >
+            {showAddForm ? 'Cancel' : '+ Add Class Time'}
+          </button>
+        </div>
+
+        {nextClass ? (
+          <p className="font-bold text-mat-text mt-1">
+            {DAY_NAMES[nextClass.slot.day_of_week]} · {formatTime(nextClass.slot.start_time)}
+            {nextClass.slot.label ? ` — ${nextClass.slot.label}` : ''}
+          </p>
+        ) : (
+          <p className="font-bold text-mat-text mt-1">No upcoming class scheduled</p>
+        )}
+
+        {schedule.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {schedule.map((s) => (
+              <span
+                key={s.id}
+                className="inline-flex items-center gap-1 bg-mat-card border border-mat-border-strong rounded px-2 py-1 text-[10px] font-semibold text-mat-muted"
+              >
+                {DAY_ABBR[s.day_of_week]} {formatTime(s.start_time)}
+                {s.label ? ` · ${s.label}` : ''}
+                <button
+                  type="button"
+                  onClick={() => handleDeleteSlot(s.id)}
+                  disabled={deletingSlotId === s.id}
+                  aria-label="Remove class time"
+                  className="text-mat-faint hover:text-mat-red disabled:opacity-40 transition-colors"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {showAddForm && (
+          <div className="flex flex-col gap-2 mt-3">
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={newDay}
+                onChange={(e) => setNewDay(Number(e.target.value))}
+                className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+              >
+                {DAY_NAMES.map((name, i) => (
+                  <option key={name} value={i}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="time"
+                value={newTime}
+                onChange={(e) => setNewTime(e.target.value)}
+                className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+              />
+            </div>
+            <input
+              type="text"
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              placeholder="Label (optional, e.g. Gi Fundamentals)"
+              className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+            />
+            <button
+              type="button"
+              onClick={handleAddSlot}
+              disabled={savingSlot}
+              className="min-h-[40px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-opacity"
+            >
+              {savingSlot ? 'Saving...' : 'Save Class Time'}
+            </button>
+            {scheduleError && <p className="text-red-400 text-xs">{scheduleError}</p>}
+          </div>
+        )}
       </div>
 
       <div>

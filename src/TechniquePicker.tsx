@@ -18,6 +18,7 @@ const CATEGORIES = ['submission', 'sweep', 'takedown', 'escape', 'guard pass', '
 
 export default function TechniquePicker({ selectedIds, onChange }: Props) {
   const [techniques, setTechniques] = useState<Technique[]>([]);
+  const [search, setSearch] = useState('');
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState('submission');
   const [adding, setAdding] = useState(false);
@@ -56,13 +57,28 @@ export default function TechniquePicker({ selectedIds, onChange }: Props) {
     setNewName('');
   };
 
+  const filteredTechniques = techniques.filter((t) =>
+    t.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <Card>
       <p className="text-sm font-semibold text-mat-muted mb-3">Techniques drilled</p>
 
-      <div className="flex flex-wrap gap-2 mb-4">
+      <input
+        type="text"
+        placeholder="Search techniques..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full min-h-[40px] rounded-lg bg-mat-bg border border-mat-border-strong text-mat-text placeholder-mat-faint px-3 text-sm outline-none transition-all duration-200 focus:border-mat-red mb-3"
+      />
+
+      <div className="max-h-40 overflow-y-auto no-scrollbar flex flex-wrap gap-2 mb-4 pr-1">
         {techniques.length === 0 && <p className="text-sm text-mat-faint italic">No techniques yet, add one below.</p>}
-        {techniques.map((t) => (
+        {techniques.length > 0 && filteredTechniques.length === 0 && (
+          <p className="text-sm text-mat-faint italic">No techniques match "{search}".</p>
+        )}
+        {filteredTechniques.map((t) => (
           <PillTag
             key={t.id}
             label={t.name}

@@ -10,10 +10,13 @@ import JourneyScreen from './screens/JourneyScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import MetricsScreen from './screens/MetricsScreen';
 import type { Session } from '@supabase/supabase-js';
+import { useDragScroll } from './hooks/useDragScroll';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('combat');
+
+  useDragScroll();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));

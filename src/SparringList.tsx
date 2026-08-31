@@ -49,7 +49,7 @@ export default function SparringList({ refreshKey }: Props) {
     return (
     <div className="space-y-3">
       <h3 className="text-lg font-bold text-mat-text">Your Rolls</h3>
-      <div className="max-h-[420px] overflow-y-auto space-y-3 pr-1">
+      <div className="max-h-[420px] overflow-y-auto no-scrollbar space-y-3 pr-1">
         {rolls.map((r) => (
                 <Card key={r.id}>
           <div className="flex items-center justify-between">

@@ -41,6 +41,7 @@ export default function HistoryScreen({ session }: Props) {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
   const [loading, setLoading] = useState(true);
+  const [gymName, setGymName] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -51,6 +52,14 @@ export default function HistoryScreen({ session }: Props) {
         .eq('user_id', session.user.id)
         .order('session_date', { ascending: false });
       setSessions(data ?? []);
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('gym_name')
+        .eq('id', session.user.id)
+        .single();
+      setGymName(profile?.gym_name || 'No academy set');
+
       setLoading(false);
     };
     load();
@@ -107,7 +116,7 @@ export default function HistoryScreen({ session }: Props) {
                   </div>
                   <div>
                     <p className="text-mat-text font-bold text-sm">{s.notes || 'Training Session'}</p>
-                    <p className="text-mat-muted text-xs">Vanguard HQ</p>
+                    <p className="text-mat-muted text-xs">{gymName}</p>
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">

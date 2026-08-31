@@ -8,6 +8,12 @@ type Props = {
   onSessionAdded: () => void;
 };
 
+const INTENSITY_OPTIONS = [
+  { label: 'Light', value: 1, activeClass: 'bg-mat-green border-mat-green text-white', hoverClass: 'hover:border-[rgba(16,185,129,0.5)]' },
+  { label: 'Medium', value: 3, activeClass: 'bg-mat-orange border-mat-orange text-white', hoverClass: 'hover:border-[rgba(245,158,11,0.5)]' },
+  { label: 'Hard', value: 5, activeClass: 'bg-mat-red border-mat-red text-white', hoverClass: 'hover:border-[rgba(255,46,85,0.5)]' },
+];
+
 export default function SessionForm({ userId, onSessionAdded }: Props) {
   const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
   const [classType, setClassType] = useState('gi');
@@ -90,13 +96,28 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
               <option value="private">Private</option>
             </select>
           </div>
-          <div>
+                   <div>
             <label className={labelClass}>Duration (minutes)</label>
             <input type="number" value={duration} onChange={(e) => setDuration(Number(e.target.value))} min={1} className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Intensity (1-5)</label>
-            <input type="number" value={intensity} onChange={(e) => setIntensity(Number(e.target.value))} min={1} max={5} className={inputClass} />
+            <label className={labelClass}>Intensity</label>
+            <div className="flex gap-2">
+              {INTENSITY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setIntensity(opt.value)}
+                  className={`flex-1 min-h-[44px] rounded-lg text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${
+                    intensity === opt.value
+                      ? opt.activeClass
+                      : `bg-mat-bg border-mat-border-strong text-mat-muted ${opt.hoverClass}`
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
