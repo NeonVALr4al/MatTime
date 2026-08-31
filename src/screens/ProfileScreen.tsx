@@ -5,8 +5,9 @@ import Card from '../components/Card';
 import PositionMatrixModal from '../components/PositionMatrixModal';
 import TrophyCase from '../components/TrophyCase';
 import { BELT_COLOR, TIP_COLOR } from '../beltColors';
+import type { Theme } from '../hooks/useTheme';
 
-type Props = { session: Session };
+type Props = { session: Session; theme: Theme; onToggleTheme: () => void };
 
 function formatMonthYear(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -18,7 +19,7 @@ function toUrl(value: string): string {
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
-export default function ProfileScreen({ session }: Props) {
+export default function ProfileScreen({ session, theme, onToggleTheme }: Props) {
   const [displayName, setDisplayName] = useState('');
   const [gymName, setGymName] = useState('');
   const [gymUrl, setGymUrl] = useState('');
@@ -311,17 +312,36 @@ export default function ProfileScreen({ session }: Props) {
               </div>
               {avatarError && <p className="text-red-400 text-xs mt-1">{avatarError}</p>}
             </div>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              disabled={signingOut}
-              aria-label="Sign out"
-              className="ml-auto flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+            <div className="ml-auto flex items-center gap-1 flex-shrink-0">
+              <button
+                type="button"
+                onClick={onToggleTheme}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] transition-all duration-200 active:scale-[0.98]"
+              >
+                {theme === 'dark' ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={signingOut}
+                aria-label="Sign out"
+                className="w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
           </Card>
 
           <div className="flex gap-3">
@@ -457,10 +477,10 @@ export default function ProfileScreen({ session }: Props) {
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        a.earned ? 'bg-mat-green/20' : 'bg-mat-border-strong'
+                        a.earned ? 'bg-mat-green/20 text-mat-green' : 'bg-mat-border-strong text-mat-faint'
                       }`}
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke={a.earned ? '#10b981' : '#9a9ba3'} strokeWidth={2} className="w-3.5 h-3.5">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
@@ -470,7 +490,7 @@ export default function ProfileScreen({ session }: Props) {
                     </div>
                   </div>
                   {a.earned && (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={2.5} className="w-4 h-4 flex-shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4 flex-shrink-0 text-mat-green">
                       <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   )}

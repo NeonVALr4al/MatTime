@@ -73,7 +73,7 @@ function Medal({ result, ring, gradient, onDelete, deleting }: {
           <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.86L12 17.77l-6.18 3.23L7 14.14 2 9.27l7.1-1.01L12 2z" />
         </svg>
       </div>
-      <p className="text-[9px] text-mat-muted text-center leading-tight truncate w-full">{result.event_name}</p>
+      <p className="text-[9px] text-white/60 text-center leading-tight truncate w-full">{result.event_name}</p>
     </div>
   );
 }

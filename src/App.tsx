@@ -11,11 +11,13 @@ import HistoryScreen from './screens/HistoryScreen';
 import MetricsScreen from './screens/MetricsScreen';
 import type { Session } from '@supabase/supabase-js';
 import { useDragScroll } from './hooks/useDragScroll';
+import { useTheme } from './hooks/useTheme';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('combat');
   const [logMode, setLogMode] = useState<'session' | 'sparring'>('session');
+  const { theme, toggleTheme } = useTheme();
 
   useDragScroll();
 
@@ -47,7 +49,7 @@ function App() {
       case 'metrics':
         return <MetricsScreen session={session} />;
       case 'profile':
-        return <ProfileScreen session={session} />;
+        return <ProfileScreen session={session} theme={theme} onToggleTheme={toggleTheme} />;
     }
   };
 

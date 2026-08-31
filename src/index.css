@@ -19,7 +19,18 @@
   --color-mat-faint: #9a9ba3;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap');
+:root[data-theme='light'] {
+  --color-mat-bg: #f4f4f6;
+  --color-mat-card: #ffffff;
+  --color-mat-border: rgba(0, 0, 0, 0.1);
+  --color-mat-border-strong: rgba(0, 0, 0, 0.18);
+  --color-mat-red: #d81b47;
+  --color-mat-green: #15803d;
+  --color-mat-orange: #b45309;
+  --color-mat-text: #18181b;
+  --color-mat-muted: #4b4b55;
+  --color-mat-faint: #6b6b76;
+}
 
 html,
 body,

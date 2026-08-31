@@ -25,25 +25,25 @@ export default function RadarChart({ data, size = 260 }: Props) {
   return (
     <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-auto">
       {RINGS.map((r) => (
-        <polygon key={r} points={polygon(() => r)} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+        <polygon key={r} points={polygon(() => r)} fill="none" className="stroke-mat-border" strokeWidth={1} />
       ))}
 
       {data.map((_, i) => {
         const [x, y] = pointAt(i, 1);
-        return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="rgba(255,255,255,0.08)" strokeWidth={1} />;
+        return <line key={i} x1={center} y1={center} x2={x} y2={y} className="stroke-mat-border" strokeWidth={1} />;
       })}
 
       <polygon
         points={polygon((i) => data[i].value / maxValue)}
         fill="rgba(255,46,85,0.25)"
-        stroke="#ff2e55"
+        className="stroke-mat-red"
         strokeWidth={2}
         strokeLinejoin="round"
       />
 
       {data.map((d, i) => {
         const [x, y] = pointAt(i, data[i].value / maxValue);
-        return <circle key={`pt-${d.label}`} cx={x} cy={y} r={2.5} fill="#ff2e55" />;
+        return <circle key={`pt-${d.label}`} cx={x} cy={y} r={2.5} className="fill-mat-red" />;
       })}
 
       {data.map((d, i) => {
@@ -61,7 +61,7 @@ export default function RadarChart({ data, size = 260 }: Props) {
             dominantBaseline={baseline}
             fontSize={9}
             fontWeight={700}
-            fill="#c1c2c7"
+            className="fill-mat-muted"
           >
             {d.label}
           </text>
