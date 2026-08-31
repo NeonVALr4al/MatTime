@@ -288,7 +288,7 @@ export default function ProfileScreen({ session }: Props) {
                   type="button"
                   onClick={() => setShowTrophyCase(true)}
                   aria-label="Open competition trophy case"
-                  className="text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                     <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" strokeLinecap="round" strokeLinejoin="round" />
@@ -299,7 +299,7 @@ export default function ProfileScreen({ session }: Props) {
                   type="button"
                   onClick={() => setShowPositionMatrix(true)}
                   aria-label="Open position matrix radar chart"
-                  className="text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                     <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
@@ -316,7 +316,7 @@ export default function ProfileScreen({ session }: Props) {
               onClick={handleSignOut}
               disabled={signingOut}
               aria-label="Sign out"
-              className="ml-auto flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
+              className="ml-auto flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
@@ -325,7 +325,7 @@ export default function ProfileScreen({ session }: Props) {
           </Card>
 
           <div className="flex gap-3">
-            <Card className="group flex-1 flex flex-col gap-3">
+            <Card className="flex-1 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-mat-faint text-[10px]">TRAINING SINCE</p>
                 {!editingTrainingSince && (
@@ -333,7 +333,7 @@ export default function ProfileScreen({ session }: Props) {
                     type="button"
                     onClick={startEditingTrainingSince}
                     aria-label="Edit training since"
-                    className="text-mat-faint hover:text-mat-red transition-opacity flex-shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                    className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -358,7 +358,7 @@ export default function ProfileScreen({ session }: Props) {
                       type="button"
                       onClick={handleSaveTrainingSince}
                       disabled={savingTrainingSince}
-                      className="flex-1 min-h-[28px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
+                      className="flex-1 min-h-[28px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
                     >
                       {savingTrainingSince ? 'Saving...' : 'Save'}
                     </button>
@@ -379,7 +379,7 @@ export default function ProfileScreen({ session }: Props) {
                 </p>
               )}
             </Card>
-            <Card className="group flex-1 flex flex-col gap-3">
+            <Card className="flex-1 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-mat-faint text-[10px]">ACADEMY</p>
                 {!editingGym && (
@@ -387,7 +387,7 @@ export default function ProfileScreen({ session }: Props) {
                     type="button"
                     onClick={startEditingGym}
                     aria-label="Edit academy"
-                    className="text-mat-faint hover:text-mat-red transition-opacity flex-shrink-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                    className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -419,7 +419,7 @@ export default function ProfileScreen({ session }: Props) {
                       type="button"
                       onClick={handleSaveGym}
                       disabled={savingGym}
-                      className="flex-1 min-h-[28px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
+                      className="flex-1 min-h-[28px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
                     >
                       {savingGym ? 'Saving...' : 'Save'}
                     </button>

@@ -6,6 +6,7 @@ import type { Tab } from '../BottomNav';
 type Props = {
   session: Session;
   onNavigate: (tab: Tab) => void;
+  onLogMode: (mode: 'session' | 'sparring') => void;
 };
 
 type ActivityItem = {
@@ -62,7 +63,7 @@ function startOfWeek(): string {
   return monday.toISOString().split('T')[0];
 }
 
-export default function CombatScreen({ session, onNavigate }: Props) {
+export default function CombatScreen({ session, onNavigate, onLogMode }: Props) {
   const [displayName, setDisplayName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [weeklyCount, setWeeklyCount] = useState(0);
@@ -223,14 +224,14 @@ export default function CombatScreen({ session, onNavigate }: Props) {
       <div className="flex gap-3">
         <button
           type="button"
-          onClick={() => onNavigate('log')}
-          className="flex-1 bg-mat-red hover:opacity-90 text-white font-semibold rounded-xl py-3 transition-opacity"
+          onClick={() => onLogMode('session')}
+          className="flex-1 bg-mat-red-strong hover:opacity-90 text-white font-semibold rounded-xl py-3 transition-opacity"
         >
           Log Session
         </button>
         <button
           type="button"
-          onClick={() => onNavigate('log')}
+          onClick={() => onLogMode('sparring')}
           className="flex-1 bg-mat-card hover:bg-mat-border text-mat-text font-semibold rounded-xl py-3 border border-mat-border transition-colors"
         >
           Log Sparring
@@ -272,7 +273,7 @@ export default function CombatScreen({ session, onNavigate }: Props) {
                   onClick={() => handleDeleteSlot(s.id)}
                   disabled={deletingSlotId === s.id}
                   aria-label="Remove class time"
-                  className="text-mat-faint hover:text-mat-red disabled:opacity-40 transition-colors"
+                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red disabled:opacity-40 transition-colors"
                 >
                   ×
                 </button>
@@ -313,7 +314,7 @@ export default function CombatScreen({ session, onNavigate }: Props) {
               type="button"
               onClick={handleAddSlot}
               disabled={savingSlot}
-              className="min-h-[40px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-opacity"
+              className="min-h-[40px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-opacity"
             >
               {savingSlot ? 'Saving...' : 'Save Class Time'}
             </button>

@@ -77,9 +77,11 @@ export default function TechniquePicker({ selectedIds, onChange }: Props) {
         onClick={() => handleDeleteTechnique(t.id)}
         disabled={deletingId === t.id}
         aria-label={`Delete ${t.name}`}
-        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-mat-card border border-mat-border-strong text-mat-faint hover:text-mat-red text-[11px] leading-none flex items-center justify-center disabled:opacity-40 transition-colors"
+        className="absolute -top-3 -right-3 p-1.5 text-mat-faint hover:text-mat-red disabled:opacity-40 transition-colors"
       >
-        ×
+        <span className="w-5 h-5 rounded-full bg-mat-card border border-mat-border-strong text-[11px] leading-none flex items-center justify-center">
+          ×
+        </span>
       </button>
     </div>
   );

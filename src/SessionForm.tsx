@@ -9,9 +9,9 @@ type Props = {
 };
 
 const INTENSITY_OPTIONS = [
-  { label: 'Light', value: 1, activeClass: 'bg-mat-green border-mat-green text-white', hoverClass: 'hover:border-[rgba(16,185,129,0.5)]' },
-  { label: 'Medium', value: 3, activeClass: 'bg-mat-orange border-mat-orange text-white', hoverClass: 'hover:border-[rgba(245,158,11,0.5)]' },
-  { label: 'Hard', value: 5, activeClass: 'bg-mat-red border-mat-red text-white', hoverClass: 'hover:border-[rgba(255,46,85,0.5)]' },
+  { label: 'Light', value: 1, activeClass: 'bg-mat-green-strong border-mat-green text-white', hoverClass: 'hover:border-[rgba(16,185,129,0.5)]' },
+  { label: 'Medium', value: 3, activeClass: 'bg-mat-orange-strong border-mat-orange text-white', hoverClass: 'hover:border-[rgba(245,158,11,0.5)]' },
+  { label: 'Hard', value: 5, activeClass: 'bg-mat-red-strong border-mat-red text-white', hoverClass: 'hover:border-[rgba(255,46,85,0.5)]' },
 ];
 
 export default function SessionForm({ userId, onSessionAdded }: Props) {
@@ -133,7 +133,7 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="w-full min-h-[44px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+          className="w-full min-h-[44px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
         >
           {saving ? 'Saving...' : 'Log Session'}
         </button>

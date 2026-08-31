@@ -1,38 +1,42 @@
-import { useState } from 'react';
-import { supabase } from '../supabaseClient';
+import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import SessionForm from '../SessionForm';
 import SessionList from '../SessionList';
 import SparringForm from '../SparringForm';
 import SparringList from '../SparringList';
 
-type Props = {
-  session: Session;
-};
-
 type Mode = 'session' | 'sparring';
 
-export default function LogScreen({ session }: Props) {
-  const [mode, setMode] = useState<Mode>('session');
+type Props = {
+  session: Session;
+  initialMode?: Mode;
+};
+
+export default function LogScreen({ session, initialMode = 'session' }: Props) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [sessionRefresh, setSessionRefresh] = useState(0);
   const [sparringRefresh, setSparringRefresh] = useState(0);
 
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
   return (
-    <div className="flex flex-col gap-6 text-white pb-4">
+    <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div>
-        <p className="text-xs font-semibold text-red-500 tracking-wide">
+        <p className="text-xs font-semibold text-mat-red tracking-wide">
           {mode === 'session' ? 'SESSION INTAKE' : 'COMBAT FEEDBACK'}
         </p>
         <h1 className="text-2xl font-bold">{mode === 'session' ? 'Log Training' : 'Log Sparring'}</h1>
       </div>
 
       {/* Mode switcher */}
-      <div className="flex bg-slate-900 rounded-xl p-1 border border-slate-800">
+      <div className="flex bg-mat-card rounded-xl p-1 border border-mat-border-strong">
         <button
           type="button"
           onClick={() => setMode('session')}
-          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-            mode === 'session' ? 'bg-red-600 text-white' : 'text-slate-400 hover:text-white'
+          className={`flex-1 min-h-[44px] rounded-lg text-sm font-semibold transition-colors ${
+            mode === 'session' ? 'bg-mat-red-strong text-white' : 'text-mat-faint hover:text-mat-text'
           }`}
         >
           Training
@@ -40,8 +44,8 @@ export default function LogScreen({ session }: Props) {
         <button
           type="button"
           onClick={() => setMode('sparring')}
-          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-            mode === 'sparring' ? 'bg-red-600 text-white' : 'text-slate-400 hover:text-white'
+          className={`flex-1 min-h-[44px] rounded-lg text-sm font-semibold transition-colors ${
+            mode === 'sparring' ? 'bg-mat-red-strong text-white' : 'text-mat-faint hover:text-mat-text'
           }`}
         >
           Sparring

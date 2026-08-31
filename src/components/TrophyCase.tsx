@@ -55,9 +55,11 @@ function Medal({ result, ring, gradient, onDelete, deleting }: {
         onClick={onDelete}
         disabled={deleting}
         aria-label="Remove result"
-        className="absolute -top-1 right-2 w-4 h-4 rounded-full bg-mat-bg border border-mat-border-strong text-mat-faint hover:text-mat-red text-[10px] leading-none flex items-center justify-center disabled:opacity-40"
+        className="absolute -top-2.5 right-0.5 p-1.5 text-mat-faint hover:text-mat-red disabled:opacity-40"
       >
-        ×
+        <span className="w-4 h-4 rounded-full bg-mat-bg border border-mat-border-strong text-[10px] leading-none flex items-center justify-center">
+          ×
+        </span>
       </button>
       <div
         title={`${result.event_name} · ${result.organization}${result.division ? ` · ${result.division}` : ''} · ${formatDate(result.event_date)}`}
@@ -281,7 +283,7 @@ export default function TrophyCase({ userId, onClose }: Props) {
                   type="button"
                   onClick={handleAdd}
                   disabled={saving}
-                  className="flex-1 min-h-[40px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg text-sm transition-opacity"
+                  className="flex-1 min-h-[40px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg text-sm transition-opacity"
                 >
                   {saving ? 'Saving...' : 'Save Result'}
                 </button>

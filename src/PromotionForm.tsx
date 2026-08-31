@@ -120,7 +120,7 @@ export default function PromotionForm({ userId, onAdded }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="w-full min-h-[44px] bg-mat-red hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+          className="w-full min-h-[44px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
         >
           {saving ? "Saving..." : "Log Promotion"}
         </button>

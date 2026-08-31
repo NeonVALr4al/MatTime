@@ -15,8 +15,14 @@ import { useDragScroll } from './hooks/useDragScroll';
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>('combat');
+  const [logMode, setLogMode] = useState<'session' | 'sparring'>('session');
 
   useDragScroll();
+
+  const goToLog = (mode: 'session' | 'sparring') => {
+    setLogMode(mode);
+    setActiveTab('log');
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -31,9 +37,9 @@ function App() {
   const renderScreen = () => {
     switch (activeTab) {
       case 'combat':
-        return <CombatScreen session={session} onNavigate={setActiveTab} />;
+        return <CombatScreen session={session} onNavigate={setActiveTab} onLogMode={goToLog} />;
       case 'log':
-        return <LogScreen session={session} />;
+        return <LogScreen session={session} initialMode={logMode} />;
       case 'journey':
         return <JourneyScreen session={session} />;
       case 'history':
