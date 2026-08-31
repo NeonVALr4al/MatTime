@@ -32,7 +32,7 @@ export default function PositionMatrixModal({ userId, onClose }: Props) {
   const totalRounds = chartData.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4">
       <div className="bg-mat-card border border-mat-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex items-center justify-between p-4 border-b border-mat-border sticky top-0 bg-mat-card">
           <div>
