@@ -68,10 +68,10 @@ export default function SparringForm({ userId, onAdded }: Props) {
   };
 
   const inputClass =
-    'w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
+    'w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent';
   const labelClass = 'block text-sm font-medium text-mat-muted mb-1.5';
   const selectClass =
-    'min-h-[44px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
+    'min-h-[44px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent';
 
   return (
     <form onSubmit={handleSubmit}>
@@ -162,7 +162,7 @@ export default function SparringForm({ userId, onAdded }: Props) {
 
         <div>
           <label className={labelClass}>Notes</label>
-          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full rounded-lg bg-mat-bg text-mat-text px-3 py-2.5 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red" />
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full rounded-lg bg-mat-bg text-mat-text px-3 py-2.5 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent" />
         </div>
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -170,7 +170,7 @@ export default function SparringForm({ userId, onAdded }: Props) {
         <button
           type="submit"
           disabled={saving}
-          className="w-full min-h-[44px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+          className="w-full min-h-[44px] bg-mat-accent-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
         >
           {saving ? 'Saving...' : 'Log Roll'}
         </button>

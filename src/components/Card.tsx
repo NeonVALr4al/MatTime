@@ -9,9 +9,9 @@ type Props = {
 export default function Card({ children, highlighted = false, className = '' }: Props) {
   return (
     <div
-      className={`rounded-2xl p-4 border transition-all duration-200 ${
+      className={`card-top-light card-weave rounded-2xl p-4 border transition-all duration-200 ${
         highlighted
-          ? 'bg-[rgba(255,46,85,0.08)] border-[rgba(255,46,85,0.3)]'
+          ? 'bg-mat-accent/8 border-mat-accent-border'
           : 'bg-mat-card border-mat-border'
       } ${className}`}
     >

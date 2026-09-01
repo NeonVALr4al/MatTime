@@ -6,9 +6,9 @@ const STORAGE_KEY = 'mattime-theme';
 
 function getInitialTheme(): Theme {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'light' ? 'light' : 'dark';
+    return localStorage.getItem(STORAGE_KEY) === 'dark' ? 'dark' : 'light';
   } catch {
-    return 'dark';
+    return 'light';
   }
 }
 
@@ -16,8 +16,8 @@ export function useTheme() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    if (theme === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
     }

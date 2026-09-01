@@ -55,7 +55,7 @@ function Medal({ result, ring, gradient, onDelete, deleting }: {
         onClick={onDelete}
         disabled={deleting}
         aria-label="Remove result"
-        className="absolute -top-2.5 right-0.5 p-1.5 text-mat-faint hover:text-mat-red disabled:opacity-40"
+        className="absolute -top-2.5 right-0.5 p-1.5 text-mat-faint hover:text-mat-accent disabled:opacity-40"
       >
         <span className="w-4 h-4 rounded-full bg-mat-bg border border-mat-border-strong text-[10px] leading-none flex items-center justify-center">
           ×
@@ -152,7 +152,7 @@ export default function TrophyCase({ userId, onClose }: Props) {
   };
 
   const inputClass =
-    'w-full min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
+    'w-full min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent';
   const labelClass = 'block text-xs font-medium text-mat-muted mb-1';
 
   return (
@@ -160,7 +160,7 @@ export default function TrophyCase({ userId, onClose }: Props) {
       <div className="bg-mat-card border border-mat-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex items-center justify-between p-4 border-b border-mat-border sticky top-0 bg-mat-card">
           <div>
-            <p className="text-mat-red text-[11px] font-semibold uppercase tracking-wide">Fighter Achievements</p>
+            <p className="text-mat-accent text-[11px] font-semibold uppercase tracking-wide">Fighter Achievements</p>
             <h2 className="text-mat-text font-extrabold text-lg">Competition Trophy Case</h2>
           </div>
           <button
@@ -274,7 +274,7 @@ export default function TrophyCase({ userId, onClose }: Props) {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full rounded-lg bg-mat-bg text-mat-text px-3 py-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                  className="w-full rounded-lg bg-mat-bg text-mat-text px-3 py-2 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
                 />
               </div>
               {error && <p className="text-red-400 text-xs">{error}</p>}
@@ -283,7 +283,7 @@ export default function TrophyCase({ userId, onClose }: Props) {
                   type="button"
                   onClick={handleAdd}
                   disabled={saving}
-                  className="flex-1 min-h-[40px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg text-sm transition-opacity"
+                  className="flex-1 min-h-[40px] bg-mat-accent-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg text-sm transition-opacity"
                 >
                   {saving ? 'Saving...' : 'Save Result'}
                 </button>
@@ -301,7 +301,7 @@ export default function TrophyCase({ userId, onClose }: Props) {
             <button
               type="button"
               onClick={() => setShowAddForm(true)}
-              className="min-h-[40px] bg-mat-card border border-mat-border-strong text-mat-text font-semibold rounded-lg text-sm hover:border-mat-red transition-colors"
+              className="min-h-[40px] bg-mat-card border border-mat-border-strong text-mat-text font-semibold rounded-lg text-sm hover:border-mat-accent transition-colors"
             >
               + Add Competition Result
             </button>

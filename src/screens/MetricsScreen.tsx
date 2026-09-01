@@ -114,7 +114,7 @@ export default function MetricsScreen({ session }: Props) {
   return (
     <div className="flex flex-col gap-5 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-mat-red text-[11px] uppercase tracking-wide">Tactical Intelligence</p>
+        <p className="font-semibold text-mat-accent text-[11px] uppercase tracking-wide">Tactical Intelligence</p>
         <h1 className="font-extrabold text-mat-text text-2xl">Mat Metrics</h1>
       </div>
 
@@ -125,7 +125,7 @@ export default function MetricsScreen({ session }: Props) {
           <div className="flex gap-3">
             <Card className="flex-1 flex flex-col gap-3 p-3.5">
               <p className="text-mat-faint text-[10px]">LIFETIME MAT HOURS</p>
-              <p className="text-mat-red font-extrabold text-3xl">{lifetimeHours.toFixed(1)}</p>
+              <p className="text-mat-accent font-extrabold text-3xl">{lifetimeHours.toFixed(1)}</p>
               <p className="text-mat-muted text-xs">+{monthHours.toFixed(1)}h this month</p>
             </Card>
             <Card className="flex-1 flex flex-col gap-3 p-3.5">
@@ -146,7 +146,7 @@ export default function MetricsScreen({ session }: Props) {
                 {weeklyWins.map((count, i) => (
                   <div
                     key={i}
-                    className="bg-mat-red rounded-sm w-2"
+                    className="bg-mat-accent rounded-sm w-2"
                     style={{ height: `${Math.max(4, (count / maxWeekly) * 40)}px` }}
                   />
                 ))}
@@ -163,7 +163,7 @@ export default function MetricsScreen({ session }: Props) {
               <Card key={sub.name}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <p className="text-mat-red font-extrabold text-sm">#{i + 1}</p>
+                    <p className="text-mat-accent font-extrabold text-sm">#{i + 1}</p>
                     <p className="text-mat-text font-bold text-sm">{sub.name}</p>
                   </div>
                   <p className="text-mat-muted text-[13px]">{sub.count} times Landed</p>

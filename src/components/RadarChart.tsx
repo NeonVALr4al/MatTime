@@ -35,15 +35,14 @@ export default function RadarChart({ data, size = 260 }: Props) {
 
       <polygon
         points={polygon((i) => data[i].value / maxValue)}
-        fill="rgba(255,46,85,0.25)"
-        className="stroke-mat-red"
+        className="fill-mat-accent/25 stroke-mat-accent"
         strokeWidth={2}
         strokeLinejoin="round"
       />
 
       {data.map((d, i) => {
         const [x, y] = pointAt(i, data[i].value / maxValue);
-        return <circle key={`pt-${d.label}`} cx={x} cy={y} r={2.5} className="fill-mat-red" />;
+        return <circle key={`pt-${d.label}`} cx={x} cy={y} r={2.5} className="fill-mat-accent" />;
       })}
 
       {data.map((d, i) => {

@@ -21,6 +21,10 @@ const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 export default function ProfileScreen({ session, theme, onToggleTheme }: Props) {
   const [displayName, setDisplayName] = useState('');
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [savingName, setSavingName] = useState(false);
+  const [nameError, setNameError] = useState('');
   const [gymName, setGymName] = useState('');
   const [gymUrl, setGymUrl] = useState('');
   const [belt, setBelt] = useState('white');
@@ -45,6 +49,12 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
   const [gymError, setGymError] = useState('');
   const [showTrophyCase, setShowTrophyCase] = useState(false);
   const [showPositionMatrix, setShowPositionMatrix] = useState(false);
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -146,6 +156,43 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
     setAvatarUrl(publicUrl);
   };
 
+  const startEditingName = () => {
+    setNameError('');
+    setNameInput(displayName);
+    setEditingName(true);
+  };
+
+  const cancelEditingName = () => {
+    setEditingName(false);
+    setNameError('');
+  };
+
+  const handleSaveName = async () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) {
+      setNameError('Name cannot be empty.');
+      return;
+    }
+
+    setNameError('');
+    setSavingName(true);
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ display_name: trimmed })
+      .eq('id', session.user.id);
+
+    setSavingName(false);
+
+    if (error) {
+      setNameError(error.message);
+      return;
+    }
+
+    setDisplayName(trimmed);
+    setEditingName(false);
+  };
+
   const startEditingGym = () => {
     setGymError('');
     setGymInput(gymName);
@@ -222,6 +269,46 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
     }
   };
 
+  const startEditingPassword = () => {
+    setPasswordError('');
+    setPasswordSuccess('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setEditingPassword(true);
+  };
+
+  const cancelEditingPassword = () => {
+    setEditingPassword(false);
+    setPasswordError('');
+  };
+
+  const handleSavePassword = async () => {
+    setPasswordError('');
+
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match.');
+      return;
+    }
+
+    setSavingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setSavingPassword(false);
+
+    if (error) {
+      setPasswordError(error.message);
+      return;
+    }
+
+    setNewPassword('');
+    setConfirmPassword('');
+    setEditingPassword(false);
+    setPasswordSuccess('Password updated.');
+  };
+
   const achievements = [
     { id: 'iron-mat', title: 'Iron Mat', description: '100 classes logged', earned: sessionCount >= 100 },
     { id: 'first-blood', title: 'First Blood', description: 'Landed first submission', earned: hasFirstSub },
@@ -231,7 +318,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
   return (
     <div className="flex flex-col gap-5 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-mat-red text-[11px] uppercase tracking-wide">Fighter Identity</p>
+        <p className="font-semibold text-mat-accent text-[11px] uppercase tracking-wide">Fighter Identity</p>
         <h1 className="font-extrabold text-mat-text text-2xl">Combat Profile</h1>
       </div>
 
@@ -251,7 +338,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
               <label
                 htmlFor="avatar-upload"
                 aria-label="Change profile picture"
-                className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-mat-red border-2 border-mat-card flex items-center justify-center cursor-pointer transition-opacity ${
+                className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-mat-accent border-2 border-mat-card flex items-center justify-center cursor-pointer transition-opacity ${
                   uploadingAvatar ? 'opacity-50 pointer-events-none' : 'hover:opacity-90'
                 }`}
               >
@@ -270,7 +357,52 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
               />
             </div>
             <div className="flex flex-col gap-1 min-w-0">
-              <p className="font-extrabold text-mat-text text-lg truncate">{displayName}</p>
+              {editingName ? (
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      placeholder="Display name"
+                      autoFocus
+                      disabled={savingName}
+                      className="flex-1 min-w-0 min-h-[32px] rounded-md bg-mat-fill text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveName}
+                      disabled={savingName}
+                      className="min-h-[32px] px-3 bg-mat-accent-strong hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
+                    >
+                      {savingName ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditingName}
+                      disabled={savingName}
+                      className="min-h-[32px] px-3 bg-mat-fill border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {nameError && <p className="text-red-400 text-xs">{nameError}</p>}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <p className="font-extrabold text-mat-text text-lg truncate">{displayName}</p>
+                  <button
+                    type="button"
+                    onClick={startEditingName}
+                    aria-label="Edit display name"
+                    className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-accent transition-colors flex-shrink-0"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+              )}
               <div className="flex items-center gap-1.5">
                 <div
                   className={`relative w-28 h-6 rounded-md overflow-hidden ${BELT_COLOR[belt] ?? BELT_COLOR.white}`}
@@ -289,7 +421,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                   type="button"
                   onClick={() => setShowTrophyCase(true)}
                   aria-label="Open competition trophy case"
-                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-accent transition-colors flex-shrink-0"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                     <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" strokeLinecap="round" strokeLinejoin="round" />
@@ -300,7 +432,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                   type="button"
                   onClick={() => setShowPositionMatrix(true)}
                   aria-label="Open position matrix radar chart"
-                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-accent transition-colors flex-shrink-0"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                     <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
@@ -317,7 +449,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                 type="button"
                 onClick={onToggleTheme}
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] transition-all duration-200 active:scale-[0.98]"
+                className="w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-accent hover:bg-mat-accent-fill transition-all duration-200 active:scale-[0.98]"
               >
                 {theme === 'dark' ? (
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
@@ -335,7 +467,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                 onClick={handleSignOut}
                 disabled={signingOut}
                 aria-label="Sign out"
-                className="w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-red hover:bg-[rgba(255,46,85,0.13)] disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
+                className="w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-accent hover:bg-mat-accent-fill disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
@@ -353,7 +485,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                     type="button"
                     onClick={startEditingTrainingSince}
                     aria-label="Edit training since"
-                    className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                    className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-accent transition-colors flex-shrink-0"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -371,14 +503,14 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                     disabled={savingTrainingSince}
                     min="1950-01-01"
                     max={new Date().toISOString().split('T')[0]}
-                    className="w-full min-h-[32px] rounded-md bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                    className="w-full min-h-[32px] rounded-md bg-mat-fill text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={handleSaveTrainingSince}
                       disabled={savingTrainingSince}
-                      className="flex-1 min-h-[28px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
+                      className="flex-1 min-h-[28px] bg-mat-accent-strong hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
                     >
                       {savingTrainingSince ? 'Saving...' : 'Save'}
                     </button>
@@ -386,7 +518,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                       type="button"
                       onClick={cancelEditingTrainingSince}
                       disabled={savingTrainingSince}
-                      className="flex-1 min-h-[28px] bg-mat-bg border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
+                      className="flex-1 min-h-[28px] bg-mat-fill border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
                     >
                       Cancel
                     </button>
@@ -407,7 +539,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                     type="button"
                     onClick={startEditingGym}
                     aria-label="Edit academy"
-                    className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red transition-colors flex-shrink-0"
+                    className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-accent transition-colors flex-shrink-0"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
                       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -424,7 +556,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                     placeholder="Academy name"
                     autoFocus
                     disabled={savingGym}
-                    className="w-full min-h-[32px] rounded-md bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                    className="w-full min-h-[32px] rounded-md bg-mat-fill text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
                   />
                   <input
                     type="text"
@@ -432,14 +564,14 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                     onChange={(e) => setGymUrlInput(e.target.value)}
                     placeholder="Link, e.g. instagram.com/yourgym"
                     disabled={savingGym}
-                    className="w-full min-h-[32px] rounded-md bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                    className="w-full min-h-[32px] rounded-md bg-mat-fill text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={handleSaveGym}
                       disabled={savingGym}
-                      className="flex-1 min-h-[28px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
+                      className="flex-1 min-h-[28px] bg-mat-accent-strong hover:opacity-90 disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-opacity"
                     >
                       {savingGym ? 'Saving...' : 'Save'}
                     </button>
@@ -447,7 +579,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                       type="button"
                       onClick={cancelEditingGym}
                       disabled={savingGym}
-                      className="flex-1 min-h-[28px] bg-mat-bg border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
+                      className="flex-1 min-h-[28px] bg-mat-fill border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
                     >
                       Cancel
                     </button>
@@ -459,12 +591,73 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                   href={gymUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-mat-red font-bold text-sm truncate hover:underline"
+                  className="text-mat-accent font-bold text-sm truncate hover:underline"
                 >
                   {gymName}
                 </a>
               ) : (
                 <p className="text-mat-text font-bold text-sm truncate">{gymName || 'No academy set'}</p>
+              )}
+            </Card>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <p className="text-mat-faint text-[11px]">ACCOUNT SECURITY</p>
+            <Card className="flex flex-col gap-3">
+              {editingPassword ? (
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="New password"
+                    autoFocus
+                    disabled={savingPassword}
+                    className="w-full min-h-[40px] rounded-lg bg-mat-fill text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20"
+                  />
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                    disabled={savingPassword}
+                    className="w-full min-h-[40px] rounded-lg bg-mat-fill text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSavePassword}
+                      disabled={savingPassword}
+                      className="flex-1 min-h-[36px] bg-mat-accent-strong hover:bg-mat-accent-hover disabled:opacity-40 text-white text-xs font-semibold rounded-md transition-colors"
+                    >
+                      {savingPassword ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelEditingPassword}
+                      disabled={savingPassword}
+                      className="flex-1 min-h-[36px] bg-mat-fill border border-mat-border-strong text-mat-muted text-xs font-semibold rounded-md hover:text-mat-text transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {passwordError && <p className="text-red-400 text-xs">{passwordError}</p>}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-mat-text font-bold text-sm">Password</p>
+                    <p className="text-mat-muted text-xs">••••••••</p>
+                    {passwordSuccess && <p className="text-mat-green text-xs mt-1">{passwordSuccess}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={startEditingPassword}
+                    className="text-xs font-semibold text-mat-accent hover:underline flex-shrink-0"
+                  >
+                    Change
+                  </button>
+                </div>
               )}
             </Card>
           </div>

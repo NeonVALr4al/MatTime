@@ -24,7 +24,7 @@ export default function LogScreen({ session, initialMode = 'session' }: Props) {
   return (
     <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div>
-        <p className="text-xs font-semibold text-mat-red tracking-wide">
+        <p className="text-xs font-semibold text-mat-accent tracking-wide">
           {mode === 'session' ? 'SESSION INTAKE' : 'COMBAT FEEDBACK'}
         </p>
         <h1 className="text-2xl font-bold">{mode === 'session' ? 'Log Training' : 'Log Sparring'}</h1>
@@ -36,7 +36,7 @@ export default function LogScreen({ session, initialMode = 'session' }: Props) {
           type="button"
           onClick={() => setMode('session')}
           className={`flex-1 min-h-[44px] rounded-lg text-sm font-semibold transition-colors ${
-            mode === 'session' ? 'bg-mat-red-strong text-white' : 'text-mat-faint hover:text-mat-text'
+            mode === 'session' ? 'bg-mat-accent-strong text-white' : 'text-mat-faint hover:text-mat-text'
           }`}
         >
           Training
@@ -45,7 +45,7 @@ export default function LogScreen({ session, initialMode = 'session' }: Props) {
           type="button"
           onClick={() => setMode('sparring')}
           className={`flex-1 min-h-[44px] rounded-lg text-sm font-semibold transition-colors ${
-            mode === 'sparring' ? 'bg-mat-red-strong text-white' : 'text-mat-faint hover:text-mat-text'
+            mode === 'sparring' ? 'bg-mat-accent-strong text-white' : 'text-mat-faint hover:text-mat-text'
           }`}
         >
           Sparring

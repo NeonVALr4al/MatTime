@@ -1,5 +1,5 @@
 export const BELT_COLOR: Record<string, string> = {
-  white: 'bg-[#e4e4e7]',
+  white: 'bg-[#e4e4e7] border border-black/10',
   blue: 'bg-[#1d4ed8]',
   purple: 'bg-[#7c3aed]',
   brown: 'bg-[#78350f]',

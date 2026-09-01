@@ -36,7 +36,7 @@ export default function PositionMatrixModal({ userId, onClose }: Props) {
       <div className="bg-mat-card border border-mat-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex items-center justify-between p-4 border-b border-mat-border sticky top-0 bg-mat-card">
           <div>
-            <p className="text-mat-red text-[11px] font-semibold uppercase tracking-wide">Playstyle</p>
+            <p className="text-mat-accent text-[11px] font-semibold uppercase tracking-wide">Playstyle</p>
             <h2 className="text-mat-text font-extrabold text-lg">Athlete's Position Matrix</h2>
           </div>
           <button

@@ -58,7 +58,7 @@ export default function JourneyScreen({ session }: Props) {
   return (
     <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div>
-        <p className="text-xs font-semibold text-mat-red tracking-wide">RANK AND PROMOTIONS</p>
+        <p className="text-xs font-semibold text-mat-accent tracking-wide">RANK AND PROMOTIONS</p>
         <h1 className="text-2xl font-extrabold">Belt Journey</h1>
       </div>
 
@@ -95,7 +95,7 @@ export default function JourneyScreen({ session }: Props) {
               <div
                 key={belt}
                 className={`rounded-2xl p-3 flex items-center gap-4 border ${
-                  isCurrent ? 'bg-[rgba(225,29,72,0.08)] border-[rgba(225,29,72,0.3)]' : 'bg-mat-card border-mat-border'
+                  isCurrent ? 'bg-mat-accent-fill border-mat-accent-border' : 'bg-mat-card border-mat-border'
                 }`}
               >
                 <div className={`relative flex-1 h-10 rounded-lg overflow-hidden ${BELT_COLOR[belt] ?? BELT_COLOR.white}`}>

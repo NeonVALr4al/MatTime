@@ -31,8 +31,8 @@ function formatDate(dateStr: string): string {
 function classBadge(classType: string) {
   const isGi = classType === 'gi';
   return {
-    bg: isGi ? 'bg-[rgba(255,46,85,0.13)]' : 'bg-mat-border-strong',
-    text: isGi ? 'text-mat-red' : 'text-mat-muted',
+    bg: isGi ? 'bg-mat-accent-fill' : 'bg-mat-border-strong',
+    text: isGi ? 'text-mat-accent' : 'text-mat-muted',
     label: classType === 'no-gi' ? 'No-Gi' : classType === 'open mat' ? 'Open Mat' : classType.charAt(0).toUpperCase() + classType.slice(1),
   };
 }
@@ -79,7 +79,7 @@ export default function HistoryScreen({ session }: Props) {
   return (
     <div className="flex flex-col gap-4 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-mat-red text-[11px] uppercase tracking-wide">Historical Archive</p>
+        <p className="font-semibold text-mat-accent text-[11px] uppercase tracking-wide">Historical Archive</p>
         <h1 className="font-extrabold text-mat-text text-2xl">Training Logs</h1>
       </div>
 

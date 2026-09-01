@@ -2,34 +2,97 @@
 
 @theme {
   --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
 
-  --color-mat-bg: #0a0b0e;
-  --color-mat-card: #12141c;
-  --color-mat-border: rgba(255, 255, 255, 0.1);
-  --color-mat-border-strong: rgba(38, 38, 38, 0.6);
-  --color-mat-red: #ff2e55;
-  --color-mat-red-strong: #d81b47;
-  --color-mat-green: #10b981;
-  --color-mat-green-strong: #15803d;
-  --color-mat-orange: #f59e0b;
-  --color-mat-orange-strong: #b45309;
-  --color-mat-text: #f4f4f5;
-  --color-mat-muted: #c1c2c7;
-  --color-mat-faint: #9a9ba3;
-}
-
-:root[data-theme='light'] {
-  --color-mat-bg: #f4f4f6;
+  /* Surface palette — Tatami Light (default): warm, gi-textile inspired */
+  --color-mat-bg: #f3eee2;
   --color-mat-card: #ffffff;
-  --color-mat-border: rgba(0, 0, 0, 0.1);
-  --color-mat-border-strong: rgba(0, 0, 0, 0.18);
-  --color-mat-red: #d81b47;
+  --color-mat-card-hover: #f7f3e9;
+  --color-mat-fill: #ece6d6;
+  --color-mat-border: rgba(27, 27, 31, 0.08);
+  --color-mat-border-strong: rgba(27, 27, 31, 0.16);
+
+  /* Accent palette — gi indigo */
+  --color-mat-accent: #2c3e7a;
+  --color-mat-accent-hover: #24316a;
+  --color-mat-accent-strong: #2c3e7a;
+  --color-mat-accent-fill: rgba(44, 62, 122, 0.1);
+  --color-mat-accent-border: rgba(44, 62, 122, 0.28);
+
   --color-mat-green: #15803d;
+  --color-mat-green-strong: #15803d;
   --color-mat-orange: #b45309;
-  --color-mat-text: #18181b;
+  --color-mat-orange-strong: #b45309;
+  --color-mat-text: #1b1b1f;
   --color-mat-muted: #4b4b55;
   --color-mat-faint: #6b6b76;
+}
+
+/* Dark companion, opt-in via the theme toggle */
+:root[data-theme='dark'] {
+  --color-mat-bg: #0b0b0f;
+  --color-mat-card: #15151c;
+  --color-mat-card-hover: #1b1b24;
+  --color-mat-fill: #1e1e28;
+  --color-mat-border: rgba(255, 255, 255, 0.08);
+  --color-mat-border-strong: #2a2a38;
+
+  --color-mat-accent: #6b7de0;
+  --color-mat-accent-hover: #8494e8;
+  --color-mat-accent-strong: #3b4a9e;
+  --color-mat-accent-fill: rgba(107, 125, 224, 0.14);
+  --color-mat-accent-border: rgba(107, 125, 224, 0.32);
+
+  --color-mat-green: #34d399;
+  --color-mat-green-strong: #15803d;
+  --color-mat-orange: #fbbf24;
+  --color-mat-orange-strong: #b45309;
+  --color-mat-text: #f4f1e8;
+  --color-mat-muted: #c7c2b4;
+  --color-mat-faint: #97927f;
+}
+
+/* Semi-transparent card surface with a blurred backdrop */
+@utility bg-glass {
+  background-color: rgb(255 255 255 / 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-mat-border-strong);
+}
+
+:root[data-theme='dark'] .bg-glass {
+  background-color: rgb(21 21 28 / 0.72);
+}
+
+/* Subtle top-lit bezel: brighter top edge, dim sides/bottom */
+@utility card-top-light {
+  border-top: 1px solid var(--color-mat-border-strong);
+  border-inline-color: var(--color-mat-border);
+  border-bottom-color: var(--color-mat-border);
+}
+
+/* Faint woven crosshatch, like gi fabric */
+@utility card-weave {
+  background-image:
+    repeating-linear-gradient(45deg, var(--color-mat-border) 0px, var(--color-mat-border) 1px, transparent 1px, transparent 10px),
+    repeating-linear-gradient(-45deg, var(--color-mat-border) 0px, var(--color-mat-border) 1px, transparent 1px, transparent 10px);
+}
+
+/* Ambient accent glow, for elevated/focused surfaces */
+@utility glow-crimson {
+  box-shadow: 0 0 20px var(--color-mat-accent-border);
+}
+
+/* Compact monospace status badge */
+@utility badge-crimson {
+  background-color: var(--color-mat-accent-fill);
+  color: var(--color-mat-accent);
+  border: 1px solid var(--color-mat-accent-border);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
 }
 
 html,

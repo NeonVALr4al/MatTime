@@ -21,7 +21,7 @@ type Props = { refreshKey: number };
 const INTENSITY_INFO: Record<number, { label: string; colorClass: string }> = {
   1: { label: 'Light', colorClass: 'text-mat-green' },
   3: { label: 'Medium', colorClass: 'text-mat-orange' },
-  5: { label: 'Hard', colorClass: 'text-mat-red' },
+  5: { label: 'Hard', colorClass: 'text-mat-accent' },
 };
 
 function getIntensityInfo(intensity: number | null): { label: string; colorClass: string } | null {
@@ -81,7 +81,7 @@ export default function SessionList({ refreshKey }: Props) {
           <div className="flex items-center justify-between">
             <p className="text-mat-text font-bold">{s.session_date}</p>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wide text-mat-red bg-[rgba(255,46,85,0.13)] px-2 py-0.5 rounded">
+              <span className="badge-crimson uppercase tracking-wide">
                 {s.class_type}
               </span>
               <DeleteButton onClick={() => handleDelete(s.id)} disabled={deletingId === s.id} />

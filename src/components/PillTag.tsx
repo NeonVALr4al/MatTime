@@ -12,8 +12,8 @@ export default function PillTag({ label, sublabel, selected, onClick }: Props) {
       onClick={onClick}
       className={`min-h-[44px] px-4 rounded-full border text-sm font-semibold transition-all duration-200 active:scale-[0.98] ${
         selected
-          ? 'bg-mat-red-strong border-mat-red text-white'
-          : 'bg-transparent border-mat-border-strong text-mat-muted hover:border-[rgba(255,46,85,0.5)] hover:text-mat-text'
+          ? 'bg-mat-accent-strong border-mat-accent text-white'
+          : 'bg-transparent border-mat-border-strong text-mat-muted hover:border-mat-accent-hover hover:text-mat-text'
       }`}
     >
       {label}

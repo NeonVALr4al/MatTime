@@ -64,7 +64,7 @@ export default function SparringList({ refreshKey }: Props) {
             <p className="text-sm text-mat-green mt-1">Landed: {r.submission_landed}</p>
           )}
           {r.submission_received && (
-            <p className="text-sm text-mat-red mt-1">Received: {r.submission_received}</p>
+            <p className="text-sm text-mat-accent mt-1">Received: {r.submission_received}</p>
           )}
           {r.notes && <p className="text-sm text-mat-muted italic mt-2">{r.notes}</p>}
         </Card>

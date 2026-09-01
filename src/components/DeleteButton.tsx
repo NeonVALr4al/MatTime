@@ -10,7 +10,7 @@ export default function DeleteButton({ onClick, disabled = false }: Props) {
       onClick={onClick}
       disabled={disabled}
       aria-label="Delete"
-      className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-mat-red hover:bg-[rgba(255,46,85,0.13)] disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
+      className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-lg text-mat-accent hover:bg-mat-accent-fill disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
     >
       {disabled ? (
         <span className="text-xs">...</span>

@@ -195,7 +195,7 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
     <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold text-mat-red tracking-wide">COMBAT STATUS</p>
+          <p className="text-xs font-semibold text-mat-accent tracking-wide">COMBAT STATUS</p>
           <h1 className="text-2xl font-extrabold">Welcome back, {loading ? '...' : displayName}</h1>
         </div>
         <button
@@ -218,14 +218,14 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
             {loading ? '...' : weeklyCount} Class{weeklyCount === 1 ? '' : 'es'} This Week
           </p>
         </div>
-        <span className="text-mat-red font-bold text-lg">X{weeklyCount}</span>
+        <span className="text-mat-accent font-bold text-lg">X{weeklyCount}</span>
       </div>
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={() => onLogMode('session')}
-          className="flex-1 bg-mat-red-strong hover:opacity-90 text-white font-semibold rounded-xl py-3 transition-opacity"
+          className="glow-crimson flex-1 bg-mat-accent-strong hover:bg-mat-accent-hover text-white font-semibold rounded-xl py-3 transition-colors"
         >
           Log Session
         </button>
@@ -238,13 +238,13 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
         </button>
       </div>
 
-      <div className="bg-[rgba(225,29,72,0.08)] border border-[rgba(225,29,72,0.25)] rounded-2xl p-4">
+      <div className="bg-mat-accent-fill border border-mat-accent-border rounded-2xl p-4">
         <div className="flex items-center justify-between">
-          <p className="text-[10px] uppercase tracking-wide text-mat-red">Upcoming Class</p>
+          <p className="text-[10px] uppercase tracking-wide text-mat-accent">Upcoming Class</p>
           <button
             type="button"
             onClick={() => setShowAddForm((v) => !v)}
-            className="text-[10px] font-bold uppercase tracking-wide text-mat-red hover:opacity-80 transition-opacity"
+            className="text-[10px] font-bold uppercase tracking-wide text-mat-accent hover:opacity-80 transition-opacity"
           >
             {showAddForm ? 'Cancel' : '+ Add Class Time'}
           </button>
@@ -273,7 +273,7 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
                   onClick={() => handleDeleteSlot(s.id)}
                   disabled={deletingSlotId === s.id}
                   aria-label="Remove class time"
-                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-red disabled:opacity-40 transition-colors"
+                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-accent disabled:opacity-40 transition-colors"
                 >
                   ×
                 </button>
@@ -288,7 +288,7 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
               <select
                 value={newDay}
                 onChange={(e) => setNewDay(Number(e.target.value))}
-                className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
               >
                 {DAY_NAMES.map((name, i) => (
                   <option key={name} value={i}>
@@ -300,7 +300,7 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
                 type="time"
                 value={newTime}
                 onChange={(e) => setNewTime(e.target.value)}
-                className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+                className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-2 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
               />
             </div>
             <input
@@ -308,13 +308,13 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
               placeholder="Label (optional, e.g. Gi Fundamentals)"
-              className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong focus:border-mat-red"
+              className="min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong focus:border-mat-accent"
             />
             <button
               type="button"
               onClick={handleAddSlot}
               disabled={savingSlot}
-              className="min-h-[40px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-opacity"
+              className="min-h-[40px] bg-mat-accent-strong hover:bg-mat-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
             >
               {savingSlot ? 'Saving...' : 'Save Class Time'}
             </button>

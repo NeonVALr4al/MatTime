@@ -33,11 +33,14 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-mat-bg font-sans px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-mat-card border border-mat-border rounded-2xl shadow-lg p-8 space-y-4"
+        className="card-top-light card-weave w-full max-w-sm bg-mat-card border border-mat-border rounded-2xl shadow-lg p-8 space-y-4"
       >
-        <h2 className="text-2xl font-extrabold text-mat-text text-center">
-          {isSignUp ? 'Create your MatTime account' : 'Welcome back'}
-        </h2>
+        <div className="text-center space-y-1">
+          <p className="text-mat-accent text-[11px] font-semibold uppercase tracking-wide">Fighter Access</p>
+          <h2 className="text-2xl font-extrabold text-mat-text">
+            {isSignUp ? 'Create your MatTime account' : 'Welcome back'}
+          </h2>
+        </div>
 
         <input
           type="email"
@@ -45,7 +48,7 @@ export default function Auth() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-4 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red"
+          className="w-full min-h-[44px] rounded-lg bg-mat-fill text-mat-text placeholder-mat-faint px-4 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20"
         />
         <input
           type="password"
@@ -53,7 +56,7 @@ export default function Auth() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text placeholder-mat-faint px-4 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red"
+          className="w-full min-h-[44px] rounded-lg bg-mat-fill text-mat-text placeholder-mat-faint px-4 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20"
         />
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -62,7 +65,7 @@ export default function Auth() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full min-h-[44px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+          className="w-full min-h-[44px] bg-mat-accent-strong hover:bg-mat-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
         >
           {submitting ? 'Please wait...' : isSignUp ? 'Sign Up' : 'Log In'}
         </button>

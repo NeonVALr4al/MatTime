@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from './supabaseClient';
-import TechniquePicker from './TechniquePicker';
+import SmartTechniqueCombobox from './components/SmartTechniqueCombobox';
 import Card from './components/Card';
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 const INTENSITY_OPTIONS = [
   { label: 'Light', value: 1, activeClass: 'bg-mat-green-strong border-mat-green text-white', hoverClass: 'hover:border-[rgba(16,185,129,0.5)]' },
   { label: 'Medium', value: 3, activeClass: 'bg-mat-orange-strong border-mat-orange text-white', hoverClass: 'hover:border-[rgba(245,158,11,0.5)]' },
-  { label: 'Hard', value: 5, activeClass: 'bg-mat-red-strong border-mat-red text-white', hoverClass: 'hover:border-[rgba(255,46,85,0.5)]' },
+  { label: 'Hard', value: 5, activeClass: 'bg-mat-accent-strong border-mat-accent text-white', hoverClass: 'hover:border-mat-accent-hover' },
 ];
 
 export default function SessionForm({ userId, onSessionAdded }: Props) {
@@ -73,7 +73,7 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
   };
 
   const inputClass =
-    'w-full min-h-[44px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red';
+    'w-full min-h-[44px] rounded-lg bg-mat-fill text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20';
   const labelClass = 'block text-sm font-medium text-mat-muted mb-1.5';
 
   return (
@@ -111,7 +111,7 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
                   className={`flex-1 min-h-[44px] rounded-lg text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${
                     intensity === opt.value
                       ? opt.activeClass
-                      : `bg-mat-bg border-mat-border-strong text-mat-muted ${opt.hoverClass}`
+                      : `bg-mat-fill border-mat-border-strong text-mat-muted ${opt.hoverClass}`
                   }`}
                 >
                   {opt.label}
@@ -123,17 +123,17 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
 
         <div>
           <label className={labelClass}>Notes</label>
-          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full rounded-lg bg-mat-bg text-mat-text px-3 py-2.5 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-red" />
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full rounded-lg bg-mat-fill text-mat-text px-3 py-2.5 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20" />
         </div>
 
-        <TechniquePicker selectedIds={techniqueIds} onChange={setTechniqueIds} />
+        <SmartTechniqueCombobox selectedIds={techniqueIds} onChange={setTechniqueIds} />
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
 
         <button
           type="submit"
           disabled={saving}
-          className="w-full min-h-[44px] bg-mat-red-strong hover:opacity-90 disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+          className="w-full min-h-[44px] bg-mat-accent-strong hover:bg-mat-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
         >
           {saving ? 'Saving...' : 'Log Session'}
         </button>
