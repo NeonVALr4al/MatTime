@@ -1,0 +1,39 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Runs daily at 12:00 UTC. Supabase free tier pauses projects after
+    # ~7 days with no activity, so daily is a comfortable safety margin.
+    - cron: '0 12 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make an authenticated request to the Supabase REST API
+        env:
+          SUPABASE_URL: https://rhruepbpxqoyoplaukjn.supabase.co
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "SUPABASE_ANON_KEY secret is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+          http_status=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            "$SUPABASE_URL/rest/v1/profiles?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+
+          echo "HTTP status: $http_status"
+          echo "Response body:"
+          cat /tmp/response.json
+          echo
+
+          if [ "$http_status" -lt 200 ] || [ "$http_status" -ge 300 ]; then
+            echo "Request failed (status $http_status) — this run should NOT count as keeping the project alive."
+            exit 1
+          fi
+
+          echo "Request succeeded — Supabase project pinged."
