@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Auth from './Auth';
+import ResetPassword from './ResetPassword';
 import BottomNav from './BottomNav';
 import ProfileScreen from './screens/ProfileScreen';
 import type { Tab } from './BottomNav';
@@ -15,6 +16,7 @@ import { useTheme } from './hooks/useTheme';
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [passwordRecovery, setPasswordRecovery] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('combat');
   const [logMode, setLogMode] = useState<'session' | 'sparring'>('session');
   const { theme, toggleTheme } = useTheme();
@@ -28,11 +30,16 @@ function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true);
       setSession(session);
     });
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  if (passwordRecovery) {
+    return <ResetPassword onDone={() => setPasswordRecovery(false)} />;
+  }
 
   if (!session) return <Auth />;
 
@@ -54,8 +61,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-mat-bg font-sans pb-20">
-      <main className="max-w-xl mx-auto px-4 py-6">{renderScreen()}</main>
+    <div className="min-h-screen bg-mat-bg font-sans pb-20 md:pb-0 md:pl-56">
+      <main className="max-w-xl md:max-w-2xl mx-auto px-4 py-6 md:py-10">{renderScreen()}</main>
       <BottomNav active={activeTab} onChange={setActiveTab} />
     </div>
   );

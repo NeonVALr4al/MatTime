@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { useEscapeKey } from '../hooks/useEscapeKey';
+import { useConfirm } from '../hooks/useConfirm';
+import { useToast } from '../hooks/useToast';
 
 type Props = { userId: string; onClose: () => void };
 
@@ -16,38 +19,25 @@ type CompetitionResult = {
 
 const ORGANIZATIONS = ['IBJJF', 'AJP', 'Other'];
 
-const SHELVES: { placement: Placement; label: string; gradient: string; ring: string }[] = [
-  {
-    placement: 'gold',
-    label: 'Gold',
-    gradient: 'radial-gradient(circle at 35% 30%, #fff6cc, #ffd700 45%, #a97a0a 100%)',
-    ring: '#ffd700',
-  },
-  {
-    placement: 'silver',
-    label: 'Silver',
-    gradient: 'radial-gradient(circle at 35% 30%, #ffffff, #c7c9cc 45%, #7c8085 100%)',
-    ring: '#c7c9cc',
-  },
-  {
-    placement: 'bronze',
-    label: 'Bronze',
-    gradient: 'radial-gradient(circle at 35% 30%, #f2c48f, #cd7f32 45%, #7c4a1e 100%)',
-    ring: '#cd7f32',
-  },
+const SHELVES: { placement: Placement; label: string; colors: [string, string, string]; ring: string }[] = [
+  { placement: 'gold', label: 'Gold', colors: ['#fff6cc', '#ffd700', '#a97a0a'], ring: '#ffd700' },
+  { placement: 'silver', label: 'Silver', colors: ['#ffffff', '#c7c9cc', '#7c8085'], ring: '#c7c9cc' },
+  { placement: 'bronze', label: 'Bronze', colors: ['#f2c48f', '#cd7f32', '#7c4a1e'], ring: '#cd7f32' },
 ];
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
-function Medal({ result, ring, gradient, onDelete, deleting }: {
+function Medal({ result, colors, onDelete, deleting }: {
   result: CompetitionResult;
-  ring: string;
-  gradient: string;
+  colors: [string, string, string];
   onDelete: () => void;
   deleting: boolean;
 }) {
+  const gradientId = `trophy-gradient-${result.id}`;
+  const [light, mid, dark] = colors;
+
   return (
     <div className="relative flex flex-col items-center gap-1 w-20">
       <button
@@ -61,18 +51,40 @@ function Medal({ result, ring, gradient, onDelete, deleting }: {
           ×
         </span>
       </button>
-      <div
-        title={`${result.event_name} · ${result.organization}${result.division ? ` · ${result.division}` : ''} · ${formatDate(result.event_date)}`}
-        className="w-14 h-14 rounded-full flex items-center justify-center"
-        style={{
-          background: gradient,
-          boxShadow: `0 5px 10px rgba(0,0,0,0.55), inset 0 -3px 4px rgba(0,0,0,0.35), inset 0 2px 3px rgba(255,255,255,0.55), 0 0 0 1px ${ring}55`,
-        }}
+      <svg
+        viewBox="0 0 24 24"
+        className="w-12 h-12"
+        style={{ filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.5))' }}
       >
-        <svg viewBox="0 0 24 24" fill="rgba(0,0,0,0.35)" className="w-6 h-6">
-          <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.86L12 17.77l-6.18 3.23L7 14.14 2 9.27l7.1-1.01L12 2z" />
-        </svg>
-      </div>
+        <title>{`${result.event_name} · ${result.organization}${result.division ? ` · ${result.division}` : ''} · ${formatDate(result.event_date)}`}</title>
+        <defs>
+          <radialGradient id={gradientId} cx="35%" cy="25%" r="75%">
+            <stop offset="0%" stopColor={light} />
+            <stop offset="45%" stopColor={mid} />
+            <stop offset="100%" stopColor={dark} />
+          </radialGradient>
+        </defs>
+        {/* handles */}
+        <path
+          d="M6 4C3 4 3 8 6 8.5M18 4c3 0 3 4 0 4.5"
+          fill="none"
+          stroke={`url(#${gradientId})`}
+          strokeWidth={1.6}
+          strokeLinecap="round"
+        />
+        {/* cup */}
+        <path
+          d="M6 3h12c0 5-1.5 8-4 8.7h-4C7.5 11 6 8 6 3z"
+          fill={`url(#${gradientId})`}
+          stroke={dark}
+          strokeWidth={0.4}
+        />
+        {/* stem */}
+        <rect x="11" y="11.2" width="2" height="4" fill={`url(#${gradientId})`} />
+        {/* base */}
+        <rect x="9" y="15.2" width="6" height="2" rx="0.5" fill={`url(#${gradientId})`} stroke={dark} strokeWidth={0.3} />
+        <rect x="7" y="17.6" width="10" height="2" rx="1" fill={`url(#${gradientId})`} stroke={dark} strokeWidth={0.3} />
+      </svg>
       <p className="text-[9px] text-white/60 text-center leading-tight truncate w-full">{result.event_name}</p>
     </div>
   );
@@ -91,6 +103,10 @@ export default function TrophyCase({ userId, onClose }: Props) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const confirm = useConfirm();
+  const { showToast } = useToast();
+
+  useEscapeKey(onClose);
 
   useEffect(() => {
     const load = async () => {
@@ -140,23 +156,30 @@ export default function TrophyCase({ userId, onClose }: Props) {
     setDivision('');
     setNotes('');
     setShowAddForm(false);
+    showToast('Competition result added.');
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Remove this result? This cannot be undone.')) return;
+    if (!(await confirm('Remove this result? This cannot be undone.'))) return;
     setDeletingId(id);
     const { error: deleteError } = await supabase.from('competition_results').delete().eq('id', id);
     setDeletingId(null);
-    if (deleteError) return alert(`Failed to delete: ${deleteError.message}`);
+    if (deleteError) return showToast(`Failed to delete: ${deleteError.message}`, 'error');
     setResults((prev) => prev.filter((r) => r.id !== id));
+    showToast('Result removed.');
   };
 
   const inputClass =
-    'w-full min-h-[40px] rounded-lg bg-mat-bg text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent';
+    'w-full min-h-[40px] rounded-lg bg-mat-fill text-mat-text px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent';
   const labelClass = 'block text-xs font-medium text-mat-muted mb-1';
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4">
+    <div
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div className="bg-mat-card border border-mat-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex items-center justify-between p-4 border-b border-mat-border sticky top-0 bg-mat-card">
           <div>
@@ -201,8 +224,7 @@ export default function TrophyCase({ userId, onClose }: Props) {
                           <Medal
                             key={r.id}
                             result={r}
-                            ring={shelf.ring}
-                            gradient={shelf.gradient}
+                            colors={shelf.colors}
                             onDelete={() => handleDelete(r.id)}
                             deleting={deletingId === r.id}
                           />

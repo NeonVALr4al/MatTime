@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from './supabaseClient';
 import SmartTechniqueCombobox from './components/SmartTechniqueCombobox';
 import Card from './components/Card';
+import { useToast } from './hooks/useToast';
 
 type Props = {
   userId: string;
@@ -15,6 +16,7 @@ const INTENSITY_OPTIONS = [
 ];
 
 export default function SessionForm({ userId, onSessionAdded }: Props) {
+  const { showToast } = useToast();
   const [sessionDate, setSessionDate] = useState(new Date().toISOString().split('T')[0]);
   const [classType, setClassType] = useState('gi');
   const [duration, setDuration] = useState(60);
@@ -70,6 +72,7 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
     setNotes('');
     setTechniqueIds([]);
     onSessionAdded();
+    showToast('Session logged.');
   };
 
   const inputClass =

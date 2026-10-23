@@ -3,6 +3,8 @@ import { supabase } from './supabaseClient';
 import Card from './components/Card';
 import DeleteButton from './components/DeleteButton';
 import CollapsibleSection from './components/CollapsibleSection';
+import { useConfirm } from './hooks/useConfirm';
+import { useToast } from './hooks/useToast';
 
 type Technique = { name: string; category: string };
 
@@ -33,6 +35,8 @@ export default function SessionList({ refreshKey }: Props) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const confirm = useConfirm();
+  const { showToast } = useToast();
 
   const fetchSessions = async () => {
     setLoading(true);
@@ -60,12 +64,13 @@ export default function SessionList({ refreshKey }: Props) {
   }, [refreshKey]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this session? This cannot be undone.')) return;
+    if (!(await confirm('Delete this session? This cannot be undone.'))) return;
     setDeletingId(id);
     const { error } = await supabase.from('sessions').delete().eq('id', id);
     setDeletingId(null);
-    if (error) return alert(`Failed to delete: ${error.message}`);
+    if (error) return showToast(`Failed to delete: ${error.message}`, 'error');
     setSessions((prev) => prev.filter((s) => s.id !== id));
+    showToast('Session deleted.');
   };
 
   if (loading) return <p className="text-mat-faint text-sm">Loading sessions...</p>;

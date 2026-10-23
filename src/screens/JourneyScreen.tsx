@@ -4,18 +4,13 @@ import type { Session } from '@supabase/supabase-js';
 import PromotionForm from '../PromotionForm';
 import PromotionList from '../PromotionList';
 import { BELT_COLOR, TIP_COLOR } from '../beltColors';
+import { monthsAtRank } from '../utils/date';
 
 type Props = {
   session: Session;
 };
 
 const BELT_ORDER = ['white', 'blue', 'purple', 'brown', 'black'];
-
-function monthsAtRank(dateStr: string): number {
-  const then = new Date(dateStr);
-  const now = new Date();
-  return (now.getFullYear() - then.getFullYear()) * 12 + (now.getMonth() - then.getMonth());
-}
 
 export default function JourneyScreen({ session }: Props) {
   const [currentBelt, setCurrentBelt] = useState('white');

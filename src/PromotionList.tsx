@@ -3,6 +3,8 @@ import { supabase } from "./supabaseClient";
 import Card from "./components/Card";
 import DeleteButton from "./components/DeleteButton";
 import CollapsibleSection from "./components/CollapsibleSection";
+import { useConfirm } from "./hooks/useConfirm";
+import { useToast } from "./hooks/useToast";
 
 type Promotion = {
   id: string;
@@ -26,6 +28,8 @@ export default function PromotionList({ userId, refreshKey, onChanged }: Props) 
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const confirm = useConfirm();
+  const { showToast } = useToast();
 
   const fetchPromotions = async () => {
     setLoading(true);
@@ -42,7 +46,7 @@ export default function PromotionList({ userId, refreshKey, onChanged }: Props) 
   }, [refreshKey]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this promotion? This cannot be undone."))
+    if (!(await confirm("Delete this promotion? This cannot be undone.")))
       return;
     setDeletingId(id);
     const { error } = await supabase
@@ -52,7 +56,7 @@ export default function PromotionList({ userId, refreshKey, onChanged }: Props) 
 
     if (error) {
       setDeletingId(null);
-      return alert(`Failed to delete: ${error.message}`);
+      return showToast(`Failed to delete: ${error.message}`, "error");
     }
 
     const { data: latest } = await supabase
@@ -75,11 +79,13 @@ export default function PromotionList({ userId, refreshKey, onChanged }: Props) 
     setDeletingId(null);
 
     if (profileError)
-      return alert(
+      return showToast(
         `Promotion removed, but rank update failed: ${profileError.message}`,
+        "error",
       );
 
     setPromotions((prev) => prev.filter((p) => p.id !== id));
+    showToast("Promotion deleted.");
     onChanged?.();
   };
 

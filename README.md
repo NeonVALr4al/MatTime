@@ -1,75 +1,83 @@
-# React + TypeScript + Vite
+# MatTime
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Brazilian Jiu-Jitsu training tracker. Log classes and sparring rounds, track belt promotions and competition results, and see your training trends over time.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Session & sparring logs** — class type, duration, intensity, techniques drilled, submission/position outcomes
+- **Belt Journey** — promotion history, current rank with stripe tracking
+- **Combat Profile** — avatar, academy, training-since date, competition results ("Trophy Case"), and a radar chart of your sparring playstyle by position
+- **Metrics** — lifetime/monthly training hours, submission rate, win/loss record, top submissions
+- **Weekly class schedule** reminders on the dashboard
+- Light/dark theme, built mobile-first with a responsive desktop layout
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- [React](https://react.dev) + [TypeScript](https://www.typescriptlang.org) + [Vite](https://vite.dev)
+- [Tailwind CSS v4](https://tailwindcss.com)
+- [Supabase](https://supabase.com) (Postgres database, authentication, file storage), accessed directly from the client with row-level security
 
-## Expanding the ESLint configuration
+## Getting started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 1. Install dependencies
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Set up Supabase
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a free project at [supabase.com](https://supabase.com), then run the SQL migrations in `supabase/migrations/` **in order** via the Supabase dashboard's SQL Editor (or the Supabase CLI). They create the database schema, row-level security policies, and storage bucket this app depends on.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 3. Configure environment variables
+
+Copy `.env.example` to `.env` and fill in your Supabase project's URL and anon/publishable key (found in your Supabase project's API settings):
+
+```bash
+cp .env.example .env
+```
 
 ```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+`.env` is gitignored and never committed — the anon key is safe to expose client-side (Supabase's row-level security is what actually protects data), but keep your own project's key out of version control regardless.
+
+### 4. Run it
+
+```bash
+npm run dev
+```
+
+## Available scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the local dev server |
+| `npm run build` | Type-check and build for production |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run the test suite (Vitest) |
+| `npm run preview` | Preview a production build locally |
+
+## Project structure
+
+```
+src/
+  screens/        One component per bottom-nav tab (Combat, Log, Journey, History, Metrics, Profile)
+  components/      Shared UI (Card, modals, toast/confirm providers, etc.)
+  hooks/           Reusable hooks (theme, drag-to-scroll, toast/confirm context)
+  *.tsx            Top-level forms and lists (SessionForm, SparringList, etc.)
+supabase/
+  migrations/      SQL schema migrations, applied in numeric order
+```
+
+## Deployment
+
+This app deploys cleanly to [Vercel](https://vercel.com) or similar static hosts — it's a standard Vite build (`npm run build` → `dist/`). Set the two `VITE_SUPABASE_*` environment variables in your hosting provider's dashboard; nothing else is required.
+
+A GitHub Actions workflow (`.github/workflows/keep-alive.yml`) pings the Supabase REST API daily so the free-tier database doesn't auto-pause from inactivity.
+
+## CI
+
+`.github/workflows/ci.yml` runs lint, tests, and a production build on every push and pull request to `main`.

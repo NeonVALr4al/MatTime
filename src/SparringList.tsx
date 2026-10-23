@@ -3,6 +3,8 @@ import { supabase } from './supabaseClient';
 import Card from './components/Card';
 import DeleteButton from './components/DeleteButton';
 import CollapsibleSection from './components/CollapsibleSection';
+import { useConfirm } from './hooks/useConfirm';
+import { useToast } from './hooks/useToast';
 
 type Roll = {
   id: string;
@@ -20,6 +22,8 @@ export default function SparringList({ refreshKey }: Props) {
   const [rolls, setRolls] = useState<Roll[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const confirm = useConfirm();
+  const { showToast } = useToast();
 
   const fetchRolls = async () => {
     setLoading(true);
@@ -36,12 +40,13 @@ export default function SparringList({ refreshKey }: Props) {
   }, [refreshKey]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this roll? This cannot be undone.')) return;
+    if (!(await confirm('Delete this roll? This cannot be undone.'))) return;
     setDeletingId(id);
     const { error } = await supabase.from('sparring_log').delete().eq('id', id);
     setDeletingId(null);
-    if (error) return alert(`Failed to delete: ${error.message}`);
+    if (error) return showToast(`Failed to delete: ${error.message}`, 'error');
     setRolls((prev) => prev.filter((r) => r.id !== id));
+    showToast('Roll deleted.');
   };
 
   if (loading) return <p className="text-mat-faint text-sm">Loading rolls...</p>;

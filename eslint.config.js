@@ -18,5 +18,12 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Flags the standard "fetch data in a useEffect on mount" pattern used
+      // throughout this app's list/screen components, which is correct here
+      // (not a bug) — kept as a warning rather than disabled outright so it's
+      // still visible if a future effect genuinely needs restructuring.
+      'react-hooks/set-state-in-effect': 'warn',
+    },
   },
 ])

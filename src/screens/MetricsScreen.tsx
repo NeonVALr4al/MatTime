@@ -2,27 +2,9 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
 import Card from '../components/Card';
+import { isWin, isLoss } from '../utils/sparring';
 
 type Props = { session: Session };
-
-type RollRow = {
-  roll_date: string;
-  submission_landed: string | null;
-  submission_received: string | null;
-  position_result: string | null;
-};
-
-function isWin(r: RollRow): boolean {
-  if (r.submission_landed) return true;
-  if (r.position_result?.startsWith('Won')) return true;
-  return false;
-}
-
-function isLoss(r: RollRow): boolean {
-  if (r.submission_received) return true;
-  if (r.position_result?.startsWith('Lost')) return true;
-  return false;
-}
 
 export default function MetricsScreen({ session }: Props) {
   const [lifetimeHours, setLifetimeHours] = useState(0);

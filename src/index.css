@@ -71,13 +71,6 @@
   border-bottom-color: var(--color-mat-border);
 }
 
-/* Faint woven crosshatch, like gi fabric */
-@utility card-weave {
-  background-image:
-    repeating-linear-gradient(45deg, var(--color-mat-border) 0px, var(--color-mat-border) 1px, transparent 1px, transparent 10px),
-    repeating-linear-gradient(-45deg, var(--color-mat-border) 0px, var(--color-mat-border) 1px, transparent 1px, transparent 10px);
-}
-
 /* Ambient accent glow, for elevated/focused surfaces */
 @utility glow-crimson {
   box-shadow: 0 0 20px var(--color-mat-accent-border);

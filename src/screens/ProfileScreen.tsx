@@ -6,20 +6,15 @@ import PositionMatrixModal from '../components/PositionMatrixModal';
 import TrophyCase from '../components/TrophyCase';
 import { BELT_COLOR, TIP_COLOR } from '../beltColors';
 import type { Theme } from '../hooks/useTheme';
+import { useToast } from '../hooks/useToast';
+import { formatMonthYear, toUrl } from '../utils/date';
 
 type Props = { session: Session; theme: Theme; onToggleTheme: () => void };
-
-function formatMonthYear(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-}
-
-function toUrl(value: string): string {
-  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
-}
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 export default function ProfileScreen({ session, theme, onToggleTheme }: Props) {
+  const { showToast } = useToast();
   const [displayName, setDisplayName] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -154,6 +149,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
     }
 
     setAvatarUrl(publicUrl);
+    showToast('Profile picture updated.');
   };
 
   const startEditingName = () => {
@@ -191,6 +187,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
 
     setDisplayName(trimmed);
     setEditingName(false);
+    showToast('Name updated.');
   };
 
   const startEditingGym = () => {
@@ -226,6 +223,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
     setGymName(trimmedName);
     setGymUrl(trimmedUrl ? toUrl(trimmedUrl) : '');
     setEditingGym(false);
+    showToast('Academy updated.');
   };
 
   const startEditingTrainingSince = () => {
@@ -258,6 +256,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
     setTrainingSinceOverride(trainingSinceInput || null);
     setTrainingSince(trainingSinceInput || null);
     setEditingTrainingSince(false);
+    showToast('Training since date updated.');
   };
 
   const handleSignOut = async () => {
@@ -265,7 +264,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
     const { error } = await supabase.auth.signOut();
     if (error) {
       setSigningOut(false);
-      alert(`Failed to sign out: ${error.message}`);
+      showToast(`Failed to sign out: ${error.message}`, 'error');
     }
   };
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "./supabaseClient";
 import Card from "./components/Card";
+import { useToast } from "./hooks/useToast";
 
 type Props = {
   userId: string;
@@ -10,6 +11,7 @@ type Props = {
 const BELTS = ["white", "blue", "purple", "brown", "black"];
 
 export default function PromotionForm({ userId, onAdded }: Props) {
+  const { showToast } = useToast();
   const [belt, setBelt] = useState("blue");
   const [stripes, setStripes] = useState(0);
   const [promotionDate, setPromotionDate] = useState(
@@ -52,6 +54,7 @@ export default function PromotionForm({ userId, onAdded }: Props) {
 
     setNotes("");
     onAdded();
+    showToast("Promotion logged.");
   };
 
   const inputClass =

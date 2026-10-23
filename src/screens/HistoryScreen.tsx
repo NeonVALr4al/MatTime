@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
 import Card from '../components/Card';
 import PillTag from '../components/PillTag';
+import { formatDate } from '../utils/date';
 
 type Props = { session: Session };
 
@@ -22,11 +23,6 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: 'no-gi', label: 'No-Gi Only' },
   { id: 'open mat', label: 'Open Mat' },
 ];
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
 
 function classBadge(classType: string) {
   const isGi = classType === 'gi';

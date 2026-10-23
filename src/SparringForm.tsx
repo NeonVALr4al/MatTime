@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
 import { SPARRING_CATEGORIES } from './sparringCategories';
+import { useToast } from './hooks/useToast';
 
 type Props = {
   userId: string;
@@ -13,6 +14,7 @@ type Technique = { id: string; name: string };
 const OUTCOMES = ['Won from', 'Lost from', 'Neutral position'];
 
 export default function SparringForm({ userId, onAdded }: Props) {
+  const { showToast } = useToast();
   const [rollDate, setRollDate] = useState(new Date().toISOString().split('T')[0]);
   const [opponentNote, setOpponentNote] = useState('');
   const [outcome, setOutcome] = useState('Won from');
@@ -65,6 +67,7 @@ export default function SparringForm({ userId, onAdded }: Props) {
     setCategory('');
     setNotes('');
     onAdded();
+    showToast('Roll logged.');
   };
 
   const inputClass =

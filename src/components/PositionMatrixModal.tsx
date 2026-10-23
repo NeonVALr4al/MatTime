@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import RadarChart from './RadarChart';
 import { SPARRING_CATEGORIES } from '../sparringCategories';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 
 type Props = { userId: string; onClose: () => void };
 
 export default function PositionMatrixModal({ userId, onClose }: Props) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+
+  useEscapeKey(onClose);
 
   useEffect(() => {
     const load = async () => {
@@ -32,7 +35,12 @@ export default function PositionMatrixModal({ userId, onClose }: Props) {
   const totalRounds = chartData.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4">
+    <div
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div className="bg-mat-card border border-mat-border rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex items-center justify-between p-4 border-b border-mat-border sticky top-0 bg-mat-card">
           <div>

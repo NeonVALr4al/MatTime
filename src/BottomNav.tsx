@@ -69,7 +69,11 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 export default function BottomNav({ active, onChange }: Props) {
   return (
-    <nav className="bg-glass fixed bottom-0 left-0 right-0 flex justify-around items-center py-1 z-50">
+    <nav
+      className="bg-glass fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-1
+        md:top-0 md:bottom-0 md:right-auto md:w-56 md:flex-col md:items-stretch md:justify-start md:gap-1 md:border-r md:border-t-0 md:p-4"
+    >
+      <p className="hidden md:block px-3 pb-4 font-extrabold text-mat-text text-lg">MatTime</p>
       {TABS.map((tab) => {
         const isActive = tab.id === active;
         return (
@@ -77,12 +81,13 @@ export default function BottomNav({ active, onChange }: Props) {
             key={tab.id}
             type="button"
             onClick={() => onChange(tab.id)}
-            className={`flex flex-col items-center justify-center gap-1 min-w-[44px] min-h-[44px] px-2 rounded-xl transition-all duration-200 active:scale-[0.98] ${
-              isActive ? 'text-mat-accent' : 'text-mat-faint hover:text-mat-muted'
+            className={`flex flex-col items-center justify-center gap-1 min-w-[44px] min-h-[44px] px-2 rounded-xl transition-all duration-200 active:scale-[0.98]
+              md:flex-row md:justify-start md:gap-3 md:w-full md:px-3 md:py-2.5 ${
+              isActive ? 'text-mat-accent md:bg-mat-accent-fill' : 'text-mat-faint hover:text-mat-muted md:hover:bg-mat-card-hover'
             }`}
           >
             {tab.icon}
-            <span className="text-[10px] font-medium">{tab.label}</span>
+            <span className="text-[10px] font-medium md:text-sm md:font-semibold">{tab.label}</span>
           </button>
         );
       })}

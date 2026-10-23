@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
 import type { Tab } from '../BottomNav';
+import { useToast } from '../hooks/useToast';
+import { formatTime, nextOccurrence, timeAgo, startOfWeek } from '../utils/date';
 
 type Props = {
   session: Session;
@@ -27,41 +29,6 @@ type ClassSlot = {
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DAY_ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-function formatTime(time: string): string {
-  const [h, m] = time.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
-  const hour12 = h % 12 === 0 ? 12 : h % 12;
-  return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
-}
-
-function nextOccurrence(dayOfWeek: number, startTime: string): Date {
-  const [h, m] = startTime.split(':').map(Number);
-  const now = new Date();
-  const result = new Date(now);
-  result.setDate(now.getDate() + ((dayOfWeek - now.getDay() + 7) % 7));
-  result.setHours(h, m, 0, 0);
-  if (result < now) result.setDate(result.getDate() + 7);
-  return result;
-}
-
-function timeAgo(dateStr: string): string {
-  const date = new Date(dateStr);
-  const today = new Date();
-  const diffDays = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays <= 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  return `${diffDays} days ago`;
-}
-
-function startOfWeek(): string {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? 6 : day - 1;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - diff);
-  monday.setHours(0, 0, 0, 0);
-  return monday.toISOString().split('T')[0];
-}
 
 export default function CombatScreen({ session, onNavigate, onLogMode }: Props) {
   const [displayName, setDisplayName] = useState('');
@@ -77,6 +44,7 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
   const [savingSlot, setSavingSlot] = useState(false);
   const [scheduleError, setScheduleError] = useState('');
   const [deletingSlotId, setDeletingSlotId] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const loadSchedule = async () => {
     const { data } = await supabase
@@ -174,13 +142,14 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
     );
     setNewLabel('');
     setShowAddForm(false);
+    showToast('Class time added.');
   };
 
   const handleDeleteSlot = async (id: string) => {
     setDeletingSlotId(id);
     const { error } = await supabase.from('class_schedule').delete().eq('id', id);
     setDeletingSlotId(null);
-    if (error) return alert(`Failed to remove class time: ${error.message}`);
+    if (error) return showToast(`Failed to remove class time: ${error.message}`, 'error');
     setSchedule((prev) => prev.filter((s) => s.id !== id));
   };
 
