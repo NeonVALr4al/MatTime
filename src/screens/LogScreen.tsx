@@ -24,9 +24,6 @@ export default function LogScreen({ session, initialMode = 'session' }: Props) {
   return (
     <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div>
-        <p className="text-xs font-semibold text-mat-accent tracking-wide">
-          {mode === 'session' ? 'SESSION INTAKE' : 'COMBAT FEEDBACK'}
-        </p>
         <h1 className="text-2xl font-bold">{mode === 'session' ? 'Log Training' : 'Log Sparring'}</h1>
       </div>
 

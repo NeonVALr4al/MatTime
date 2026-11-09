@@ -53,7 +53,6 @@ export default function JourneyScreen({ session }: Props) {
   return (
     <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div>
-        <p className="text-xs font-semibold text-mat-accent tracking-wide">RANK AND PROMOTIONS</p>
         <h1 className="text-2xl font-extrabold">Belt Journey</h1>
       </div>
 

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
 import Card from '../components/Card';
-import PositionMatrixModal from '../components/PositionMatrixModal';
 import TrophyCase from '../components/TrophyCase';
 import { BELT_COLOR, TIP_COLOR } from '../beltColors';
 import type { Theme } from '../hooks/useTheme';
@@ -43,7 +42,6 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
   const [savingGym, setSavingGym] = useState(false);
   const [gymError, setGymError] = useState('');
   const [showTrophyCase, setShowTrophyCase] = useState(false);
-  const [showPositionMatrix, setShowPositionMatrix] = useState(false);
   const [editingPassword, setEditingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -317,7 +315,6 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
   return (
     <div className="flex flex-col gap-5 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-mat-accent text-[11px] uppercase tracking-wide">Fighter Identity</p>
         <h1 className="font-extrabold text-mat-text text-2xl">Combat Profile</h1>
       </div>
 
@@ -425,19 +422,6 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
                     <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M7 5H4a1 1 0 0 0-1 1v1a4 4 0 0 0 4 4M17 5h3a1 1 0 0 1 1 1v1a4 4 0 0 1-4 4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowPositionMatrix(true)}
-                  aria-label="Open position matrix radar chart"
-                  className="p-1.5 -m-1.5 text-mat-faint hover:text-mat-accent transition-colors flex-shrink-0"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-                    <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="12" cy="12" r="5.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="12" cy="12" r="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M12 3v3M12 18v3M21 12h-3M6 12H3" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               </div>
@@ -697,9 +681,6 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
         <TrophyCase userId={session.user.id} onClose={() => setShowTrophyCase(false)} />
       )}
 
-      {showPositionMatrix && (
-        <PositionMatrixModal userId={session.user.id} onClose={() => setShowPositionMatrix(false)} />
-      )}
     </div>
   );
 }

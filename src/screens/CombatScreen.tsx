@@ -164,7 +164,6 @@ export default function CombatScreen({ session, onNavigate, onLogMode }: Props) 
     <div className="flex flex-col gap-6 text-mat-text pb-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold text-mat-accent tracking-wide">COMBAT STATUS</p>
           <h1 className="text-2xl font-extrabold">Welcome back, {loading ? '...' : displayName}</h1>
         </div>
         <button

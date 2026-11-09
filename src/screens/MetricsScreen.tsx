@@ -96,7 +96,6 @@ export default function MetricsScreen({ session }: Props) {
   return (
     <div className="flex flex-col gap-5 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-mat-accent text-[11px] uppercase tracking-wide">Tactical Intelligence</p>
         <h1 className="font-extrabold text-mat-text text-2xl">Mat Metrics</h1>
       </div>
 

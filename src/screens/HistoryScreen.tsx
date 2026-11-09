@@ -75,17 +75,16 @@ export default function HistoryScreen({ session }: Props) {
   return (
     <div className="flex flex-col gap-4 pb-4">
       <div className="flex flex-col gap-1">
-        <p className="font-semibold text-mat-accent text-[11px] uppercase tracking-wide">Historical Archive</p>
         <h1 className="font-extrabold text-mat-text text-2xl">Training Logs</h1>
       </div>
 
       <div className="flex gap-3">
         <Card className="flex-1 flex flex-col gap-3">
-          <p className="text-mat-faint text-[11px]">{monthLabel}VOLUME</p>
+          <p className="text-mat-faint text-[11px]">{monthLabel} VOLUME</p>
           <p className="text-mat-text font-bold text-xl">{monthVolumeHours} Hours</p>
         </Card>
         <Card className="flex-1 flex flex-col gap-3">
-          <p className="text-mat-faint text-[11px]">{monthLabel}CLASSES</p>
+          <p className="text-mat-faint text-[11px]">{monthLabel} CLASSES</p>
           <p className="text-mat-text font-bold text-xl">{thisMonthSessions.length} Total</p>
         </Card>
       </div>
