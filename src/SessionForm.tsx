@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import SmartTechniqueCombobox from './components/SmartTechniqueCombobox';
 import Card from './components/Card';
 import { useToast } from './hooks/useToast';
+import { enqueueSession } from './utils/offlineQueue';
+import { syncQueuedSessions } from './utils/syncQueue';
 
 type Props = {
   userId: string;
@@ -26,10 +28,55 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const trySyncQueue = useCallback(async () => {
+    const { synced } = await syncQueuedSessions();
+    if (synced.length > 0) {
+      showToast(`Synced ${synced.length} offline session${synced.length > 1 ? 's' : ''}.`);
+      onSessionAdded();
+    }
+  }, [showToast, onSessionAdded]);
+
+  useEffect(() => {
+    if (navigator.onLine) trySyncQueue();
+    window.addEventListener('online', trySyncQueue);
+    return () => window.removeEventListener('online', trySyncQueue);
+  }, [trySyncQueue]);
+
+  const resetForm = () => {
+    setSessionDate(new Date().toISOString().split('T')[0]);
+    setClassType('gi');
+    setDuration(60);
+    setIntensity(3);
+    setNotes('');
+    setTechniqueIds([]);
+  };
+
+  const saveOffline = async () => {
+    await enqueueSession({
+      id: crypto.randomUUID(),
+      user_id: userId,
+      session_date: sessionDate,
+      class_type: classType,
+      duration_minutes: duration,
+      intensity,
+      notes,
+      technique_ids: techniqueIds,
+    });
+    setSaving(false);
+    resetForm();
+    onSessionAdded();
+    showToast("You're offline — session saved and will sync automatically.");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSaving(true);
+
+    if (!navigator.onLine) {
+      await saveOffline();
+      return;
+    }
 
     const { data: sessionData, error: sessionError } = await supabase
       .from('sessions')
@@ -45,6 +92,10 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
       .single();
 
     if (sessionError) {
+      if (!navigator.onLine) {
+        await saveOffline();
+        return;
+      }
       setSaving(false);
       setError(sessionError.message);
       return;
@@ -65,12 +116,7 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
     }
 
     setSaving(false);
-    setSessionDate(new Date().toISOString().split('T')[0]);
-    setClassType('gi');
-    setDuration(60);
-    setIntensity(3);
-    setNotes('');
-    setTechniqueIds([]);
+    resetForm();
     onSessionAdded();
     showToast('Session logged.');
   };
@@ -129,7 +175,7 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="w-full rounded-lg bg-mat-fill text-mat-text px-3 py-2.5 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20" />
         </div>
 
-        <SmartTechniqueCombobox selectedIds={techniqueIds} onChange={setTechniqueIds} />
+        <SmartTechniqueCombobox userId={userId} selectedIds={techniqueIds} onChange={setTechniqueIds} />
 
         {error && <p className="text-red-400 text-sm">{error}</p>}
 
