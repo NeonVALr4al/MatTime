@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import type { Session } from '@supabase/supabase-js';
 import Card from '../components/Card';
 import { isWin, isLoss } from '../utils/sparring';
+import { toTitleCase } from '../utils/text';
 
 type Props = { session: Session };
 
@@ -73,14 +74,16 @@ export default function MetricsScreen({ session }: Props) {
       });
       setWeeklyWins(weekBuckets);
 
-      const counts: Record<string, number> = {};
+      const counts: Record<string, { label: string; count: number }> = {};
       allRolls.forEach((r) => {
-        if (r.submission_landed) {
-          counts[r.submission_landed] = (counts[r.submission_landed] ?? 0) + 1;
-        }
+        const trimmed = r.submission_landed?.trim();
+        if (!trimmed) return;
+        const key = trimmed.toLowerCase();
+        if (!counts[key]) counts[key] = { label: toTitleCase(trimmed), count: 0 };
+        counts[key].count++;
       });
-      const ranked = Object.entries(counts)
-        .map(([name, count]) => ({ name, count }))
+      const ranked = Object.values(counts)
+        .map(({ label, count }) => ({ name: label, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 3);
       setTopSubmissions(ranked);
