@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from './supabaseClient';
 import Card from './components/Card';
-import { SPARRING_CATEGORIES } from './sparringCategories';
 import { useToast } from './hooks/useToast';
+import { toTitleCase } from './utils/text';
 
 type Props = {
   userId: string;
   onAdded: () => void;
 };
-
-type Technique = { id: string; name: string };
 
 const OUTCOMES = ['Won from', 'Lost from', 'Neutral position'];
 
@@ -21,23 +19,9 @@ export default function SparringForm({ userId, onAdded }: Props) {
   const [position, setPosition] = useState('');
   const [submissionLanded, setSubmissionLanded] = useState('');
   const [submissionReceived, setSubmissionReceived] = useState('');
-  const [category, setCategory] = useState('');
   const [notes, setNotes] = useState('');
-  const [submissionTechniques, setSubmissionTechniques] = useState<Technique[]>([]);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    const loadSubmissions = async () => {
-      const { data } = await supabase
-        .from('techniques')
-        .select('id, name')
-        .eq('category', 'submission')
-        .order('name');
-      setSubmissionTechniques(data ?? []);
-    };
-    loadSubmissions();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,9 +35,8 @@ export default function SparringForm({ userId, onAdded }: Props) {
       roll_date: rollDate,
       opponent_note: opponentNote || null,
       position_result: positionResult,
-      submission_landed: submissionLanded || null,
-      submission_received: submissionReceived || null,
-      category: category || null,
+      submission_landed: submissionLanded.trim() || null,
+      submission_received: submissionReceived.trim() || null,
       notes: notes || null,
     });
 
@@ -64,7 +47,6 @@ export default function SparringForm({ userId, onAdded }: Props) {
     setPosition('');
     setSubmissionLanded('');
     setSubmissionReceived('');
-    setCategory('');
     setNotes('');
     onAdded();
     showToast('Roll logged.');
@@ -120,46 +102,26 @@ export default function SparringForm({ userId, onAdded }: Props) {
           </div>
         </div>
 
-        <div>
-          <label className={labelClass}>Focus Area</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className={`${selectClass} w-full`}
-          >
-            <option value="">Uncategorized</option>
-            {SPARRING_CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>{c.label}</option>
-            ))}
-          </select>
-        </div>
-
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Submission Landed</label>
-            <select
+            <input
+              type="text"
+              placeholder="e.g. Armbar"
               value={submissionLanded}
-              onChange={(e) => setSubmissionLanded(e.target.value)}
-              className={`${selectClass} w-full`}
-            >
-              <option value="">None</option>
-              {submissionTechniques.map((t) => (
-                <option key={t.id} value={t.name}>{t.name}</option>
-              ))}
-            </select>
+              onChange={(e) => setSubmissionLanded(toTitleCase(e.target.value))}
+              className={`${inputClass} w-full`}
+            />
           </div>
           <div>
             <label className={labelClass}>Submission Received</label>
-            <select
+            <input
+              type="text"
+              placeholder="e.g. Triangle Choke"
               value={submissionReceived}
-              onChange={(e) => setSubmissionReceived(e.target.value)}
-              className={`${selectClass} w-full`}
-            >
-              <option value="">None</option>
-              {submissionTechniques.map((t) => (
-                <option key={t.id} value={t.name}>{t.name}</option>
-              ))}
-            </select>
+              onChange={(e) => setSubmissionReceived(toTitleCase(e.target.value))}
+              className={`${inputClass} w-full`}
+            />
           </div>
         </div>
 

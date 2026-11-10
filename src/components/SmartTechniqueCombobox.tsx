@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { toTitleCase } from '../utils/text';
 
 type Technique = {
   id: string;
   name: string;
-  category: string;
 };
 
 type Props = {
@@ -13,33 +13,17 @@ type Props = {
   onChange: (ids: string[]) => void;
 };
 
-const CATEGORIES = ['submission', 'sweep', 'takedown', 'escape', 'guard pass', 'guard retention'];
-
-const CATEGORY_LABELS: Record<string, string> = {
-  submission: 'Submission',
-  sweep: 'Sweep',
-  takedown: 'Takedown',
-  escape: 'Escape',
-  'guard pass': 'Guard Pass',
-  'guard retention': 'Guard Retention',
-};
-
-function toTitleCase(value: string): string {
-  return value.replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase());
-}
-
 export default function SmartTechniqueCombobox({ userId, selectedIds, onChange }: Props) {
   const [techniques, setTechniques] = useState<Technique[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('techniques').select('id, name, category').order('name');
+      const { data, error } = await supabase.from('techniques').select('id, name').order('name');
       if (!error && data) setTechniques(data);
       setLoading(false);
     };
@@ -61,36 +45,34 @@ export default function SmartTechniqueCombobox({ userId, selectedIds, onChange }
 
   const handleAdd = async () => {
     const trimmed = name.trim();
-    if (!trimmed || !category) return;
+    if (!trimmed) return;
     setError('');
 
     const existing = techniques.find((t) => t.name.toLowerCase() === trimmed.toLowerCase());
     if (existing) {
       addId(existing.id);
       setName('');
-      setCategory(null);
       return;
     }
 
     setSaving(true);
     const { data, error: insertError } = await supabase
       .from('techniques')
-      .insert({ name: toTitleCase(trimmed), category, created_by: userId })
-      .select('id, name, category')
+      .insert({ name: toTitleCase(trimmed), created_by: userId })
+      .select('id, name')
       .single();
 
     if (insertError) {
       if (insertError.code === '23505') {
         const { data: found } = await supabase
           .from('techniques')
-          .select('id, name, category')
+          .select('id, name')
           .ilike('name', trimmed)
           .maybeSingle();
         if (found) {
           setTechniques((prev) => [...prev, found]);
           addId(found.id);
           setName('');
-          setCategory(null);
         } else {
           setError('That technique already exists but could not be found. Try again.');
         }
@@ -104,11 +86,10 @@ export default function SmartTechniqueCombobox({ userId, selectedIds, onChange }
     setTechniques((prev) => [...prev, data]);
     addId(data.id);
     setName('');
-    setCategory(null);
     setSaving(false);
   };
 
-  const canAdd = name.trim().length > 0 && !!category && !saving;
+  const canAdd = name.trim().length > 0 && !saving;
 
   return (
     <div className="space-y-3">
@@ -118,7 +99,7 @@ export default function SmartTechniqueCombobox({ userId, selectedIds, onChange }
         <input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(toTitleCase(e.target.value))}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
@@ -129,23 +110,6 @@ export default function SmartTechniqueCombobox({ userId, selectedIds, onChange }
           disabled={loading}
           className="w-full min-h-[44px] rounded-lg bg-mat-fill text-mat-text placeholder-mat-faint px-3 text-sm outline-none border border-mat-border-strong transition-all duration-200 focus:border-mat-accent focus:ring-1 focus:ring-mat-accent/20 disabled:opacity-50"
         />
-
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setCategory(category === c ? null : c)}
-              className={`min-h-[36px] px-3 rounded-full text-xs font-semibold border transition-colors active:scale-[0.98] ${
-                category === c
-                  ? 'bg-mat-accent-strong border-mat-accent text-white'
-                  : 'bg-transparent border-mat-border-strong text-mat-muted hover:border-mat-accent-hover hover:text-mat-text'
-              }`}
-            >
-              {CATEGORY_LABELS[c]}
-            </button>
-          ))}
-        </div>
 
         <button
           type="button"
@@ -167,7 +131,6 @@ export default function SmartTechniqueCombobox({ userId, selectedIds, onChange }
               className="inline-flex items-center gap-1.5 min-h-[32px] pl-3 pr-2 rounded-full bg-mat-accent-fill border border-mat-accent-border text-mat-accent text-xs font-semibold"
             >
               {t.name}
-              <span className="opacity-70 font-normal">· {CATEGORY_LABELS[t.category] ?? t.category}</span>
               <button
                 type="button"
                 onClick={() => removeId(t.id)}
