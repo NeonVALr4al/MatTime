@@ -65,12 +65,18 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
     setSaving(false);
     resetForm();
     onSessionAdded();
-    showToast("You're offline — session saved and will sync automatically.");
+    showToast("Saved offline. It will sync when you're back online.");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (techniqueIds.length === 0) {
+      setError('Add at least one technique before logging a session.');
+      return;
+    }
+
     setSaving(true);
 
     if (!navigator.onLine) {
@@ -181,7 +187,7 @@ export default function SessionForm({ userId, onSessionAdded }: Props) {
 
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || techniqueIds.length === 0}
           className="w-full min-h-[44px] bg-mat-accent-strong hover:bg-mat-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
         >
           {saving ? 'Saving...' : 'Log Session'}
