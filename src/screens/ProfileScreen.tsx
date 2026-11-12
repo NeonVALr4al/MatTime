@@ -7,6 +7,7 @@ import { BELT_COLOR, TIP_COLOR } from '../beltColors';
 import type { Theme } from '../hooks/useTheme';
 import { useToast } from '../hooks/useToast';
 import { formatMonthYear, toUrl } from '../utils/date';
+import { exitDemo } from '../utils/demo';
 
 type Props = { session: Session; theme: Theme; onToggleTheme: () => void };
 
@@ -259,6 +260,16 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
 
   const handleSignOut = async () => {
     setSigningOut(true);
+
+    if (session.user.is_anonymous) {
+      const { error } = await exitDemo();
+      if (error) {
+        setSigningOut(false);
+        showToast(`Failed to exit demo: ${error}`, 'error');
+      }
+      return;
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       setSigningOut(false);
@@ -449,7 +460,7 @@ export default function ProfileScreen({ session, theme, onToggleTheme }: Props) 
                 type="button"
                 onClick={handleSignOut}
                 disabled={signingOut}
-                aria-label="Sign out"
+                aria-label={session.user.is_anonymous ? 'Exit demo' : 'Sign out'}
                 className="w-11 h-11 flex items-center justify-center rounded-lg text-mat-muted hover:text-mat-accent hover:bg-mat-accent-fill disabled:opacity-40 transition-all duration-200 active:scale-[0.98]"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">

@@ -10,6 +10,18 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [startingDemo, setStartingDemo] = useState(false);
+
+  const handleTryDemo = async () => {
+    setError('');
+    setMessage('');
+    setStartingDemo(true);
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      setStartingDemo(false);
+      setError(error.message);
+    }
+  };
 
   const switchMode = (next: Mode) => {
     setMode(next);
@@ -122,6 +134,24 @@ export default function Auth() {
             {mode === 'signup' ? 'Already have an account? Log in' : "Need an account? Sign up"}
           </button>
         )}
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-mat-border-strong" />
+          <span className="text-[11px] font-semibold text-mat-faint uppercase tracking-wide">or</span>
+          <div className="h-px flex-1 bg-mat-border-strong" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleTryDemo}
+          disabled={startingDemo}
+          className="w-full min-h-[44px] bg-transparent border border-mat-border-strong hover:border-mat-accent-hover disabled:opacity-40 text-mat-text font-semibold rounded-lg transition-all duration-200 active:scale-[0.98]"
+        >
+          {startingDemo ? 'Starting demo...' : 'Try Demo'}
+        </button>
+        <p className="text-center text-[11px] text-mat-faint">
+          No account needed. Everything you do is erased when you exit.
+        </p>
       </form>
     </div>
   );
